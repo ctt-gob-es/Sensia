@@ -1,0 +1,78 @@
+<div class="login-container">
+  <form class="login-form" [formGroup]="loginForm" (ngSubmit)="handleSubmit()">
+    <h3 class="brand-title">SensIA - Sensor Inteligente de Anonimización</h3>
+    
+    <h3 *ngIf="viewMode === 'login'">Iniciar Sesión</h3>
+    <h3 *ngIf="viewMode === 'forgot'">Recuperar Contraseña</h3>
+    <h3 *ngIf="viewMode === 'reset'">Crear Nueva Contraseña</h3>
+    <h3 *ngIf="viewMode === 'register'">Crear Cuenta</h3>
+
+    <div class="form-field">
+      <label for="email">Email</label>
+      <input id="email" class="input-login" type="email" formControlName="email" placeholder="tu@email.com">
+      <div *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.hasError('required')" class="error-text">
+        El email es obligatorio.
+      </div>
+      <div *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.hasError('email')" class="error-text">
+        Por favor, introduce un email válido.
+      </div>
+    </div>
+
+    <div class="form-field" *ngIf="viewMode === 'reset'">
+      <label for="token">Código / Clave temporal</label>
+      <input id="token" class="input-login" type="text" formControlName="token" placeholder="Pega aquí el código del email">
+      <div *ngIf="loginForm.get('token')?.touched && loginForm.get('token')?.hasError('required')" class="error-text">
+        El código es obligatorio.
+      </div>
+    </div>
+
+    <div class="form-field" *ngIf="viewMode === 'login' || viewMode === 'reset'">
+      <label for="password">{{ viewMode === 'reset' ? 'Nueva Contraseña' : 'Contraseña' }}</label>
+      <div class="input-con-boton">
+        <input id="password" class="input-password" [type]="passwordVisible ? 'text' : 'password'"
+          formControlName="password" [placeholder]="viewMode === 'reset' ? 'Escribe tu nueva contraseña' : 'Tu contraseña'">
+        <button type="button" (click)="togglePasswordVisibility()" class="boton-ojo">
+          <span *ngIf="!passwordVisible">&#128065;</span> <span *ngIf="passwordVisible">&#8856;</span> 
+        </button>
+      </div>
+      <div *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required')" class="error-text">
+        La contraseña es obligatoria.
+      </div>
+      <div *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.hasError('minlength')" class="error-text">
+        La contraseña debe tener al menos 12 caracteres.
+      </div>      
+    </div>
+
+    <div *ngIf="errorMessage()" class="error-message">
+      {{ errorMessage() }}
+    </div>
+
+    <div class="form-field" *ngIf="captchaEnabled()">
+      <altcha-widget #altchaWidget [challengeurl]="challengeUrl" (statechange)="onAltchaStateChange($event)">
+      </altcha-widget>
+      <div *ngIf="loginForm.get('email')?.touched && !altchaPayload" class="error-text">
+        La verificación de seguridad es obligatoria.
+      </div>
+    </div>
+
+    <button type="submit" class="button-login">
+      {{ viewMode === 'login' ? 'Entrar' : 
+         viewMode === 'forgot' ? 'Enviar clave temporal' : 
+         viewMode === 'reset' ? 'Guardar y Entrar' : 'Registrarse' }}
+    </button>
+
+    <ng-container *ngIf="viewMode === 'login'">
+      <button *ngIf="registrationEnabled()" type="button" class="btn-link-sutil" style="margin-top: 15px;" (click)="setViewMode('register')">
+        ¿No tienes cuenta? Regístrate aquí.
+      </button>
+      <button *ngIf="passwordRecoveryEnabled()" type="button" class="btn-link-sutil" (click)="setViewMode('forgot')">
+        ¿Olvidaste tu contraseña? Envíame una temporal.
+      </button>
+    </ng-container>
+
+    <button *ngIf="viewMode !== 'login'" type="button" class="btn-link-sutil" style="margin-top: 15px;" (click)="setViewMode('login')">
+      Volver al inicio de sesión
+    </button>
+
+  </form>
+</div>

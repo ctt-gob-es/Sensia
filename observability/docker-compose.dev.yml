@@ -1,0 +1,11 @@
+services:
+  tempo:
+    ports:
+      - "127.0.0.1:4317:4317"
+      - "127.0.0.1:4318:4318"
+  alloy:
+    volumes:
+      - ./config.dev.alloy:/etc/alloy/config.alloy:ro
+      - ../backend-app/logs:/var/log/sensia/backend-app:ro
+      - ../backend-ws/logs:/var/log/sensia/backend-ws:ro
+      - ../backend-ner/logs:/var/log/sensia/backend-ner:ro

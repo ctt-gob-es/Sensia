@@ -1,0 +1,275 @@
+<div class="settings-container">
+  <header class="settings-header">
+    <h3 class="settings-title">⚙️ Preferencias de procesamiento</h3>
+    <div class="header-actions">
+      <button type="button" class="btn-cancel" (click)="restaurarPorDefecto()" [disabled]="isSaving()">
+        Restaurar por defecto
+      </button>
+      <button type="button" class="btn-cancel" (click)="goBack()">Volver</button>
+      <button type="button" class="btn-save" (click)="onSubmit()"
+        [disabled]="isSaving() || !settingsForm.dirty || settingsForm.invalid">
+        {{ isSaving() ? 'Guardando...' : 'Guardar cambios' }}
+      </button>
+    </div>
+  </header>
+
+  <nav class="pestanas" role="tablist" aria-label="Apartados de las preferencias">
+    <button type="button" role="tab" *ngFor="let p of pestanas" [id]="'pestana-' + p.id"
+      [attr.aria-selected]="pestanaActiva === p.id" [attr.aria-controls]="'panel-' + p.id"
+      [class.activa]="pestanaActiva === p.id" (click)="pestanaActiva = p.id">
+      {{ p.titulo }}
+      <span class="marca-error" *ngIf="tieneErrores(p.id)" title="Hay campos con errores"></span>
+    </button>
+  </nav>
+
+  <form [formGroup]="settingsForm">
+    <div formGroupName="sensiaOptions">
+
+      <!-- ============ GENERAL ============ -->
+      <section class="panel" *ngIf="pestanaActiva === 'general'" id="panel-general" role="tabpanel"
+        aria-labelledby="pestana-general">
+
+        <div class="card section-card">
+          <h4>Revisión</h4>
+          <label class="switch-container">
+            <input type="checkbox" formControlName="redactionPreview">
+            <span class="switch-slider"></span>
+            <span class="switch-label">Vista previa antes de confirmar</span>
+          </label>
+          <p class="descripcion">Cada documento queda pendiente de revisión antes de generar la versión definitiva.</p>
+        </div>
+
+        <div class="card section-card" formGroupName="documentOptions">
+          <h4>Cómo se censura</h4>
+          <div class="input-group">
+            <label for="grosor">Grosor del tachado</label>
+            <div class="rango">
+              <input id="grosor" type="range" min="-5" max="5" step="1" formControlName="redactionThickness">
+              <span class="valor-rango">{{ valor('sensiaOptions.documentOptions.redactionThickness') }}</span>
+            </div>
+          </div>
+          <label class="switch-container">
+            <input type="checkbox" formControlName="usePseudonyms">
+            <span class="switch-slider"></span>
+            <span class="switch-label">Anonimizar con seudónimos</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- ============ DETECCIÓN ============ -->
+      <section class="panel" *ngIf="pestanaActiva === 'deteccion'" id="panel-deteccion" role="tabpanel"
+        aria-labelledby="pestana-deteccion">
+
+        <div class="card section-card" formGroupName="documentOptions">
+          <h4>Qué se censura</h4>
+          <label class="switch-container">
+            <input type="checkbox" formControlName="redactNames">
+            <span class="switch-slider"></span>
+            <span class="switch-label">Nombres propios</span>
+          </label>
+          <label class="switch-container">
+            <input type="checkbox" formControlName="redactQRCodes">
+            <span class="switch-slider"></span>
+            <span class="switch-label">Códigos QR</span>
+          </label>
+        </div>
+
+        <div class="card section-card" formGroupName="documentOptions">
+          <h4>Reconocimiento de entidades (NER)</h4>
+          <p class="descripcion-bloque">Detección con inteligencia artificial. El umbral de confianza está en «Avanzado».</p>
+          <label class="switch-container">
+            <input type="checkbox" formControlName="redactNERNames">
+            <span class="switch-slider"></span>
+            <span class="switch-label">Personas</span>
+          </label>
+          <label class="switch-container">
+            <input type="checkbox" formControlName="redactNEROrg">
+            <span class="switch-slider"></span>
+            <span class="switch-label">Organizaciones</span>
+          </label>
+          <label class="switch-container">
+            <input type="checkbox" formControlName="redactNERLoc">
+            <span class="switch-slider"></span>
+            <span class="switch-label">Lugares</span>
+          </label>
+          <label class="switch-container">
+            <input type="checkbox" formControlName="redactNERMisc">
+            <span class="switch-slider"></span>
+            <span class="switch-label">Otras entidades</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- ============ IMÁGENES Y ROSTROS ============ -->
+      <section class="panel" *ngIf="pestanaActiva === 'imagenes'" id="panel-imagenes" role="tabpanel"
+        aria-labelledby="pestana-imagenes">
+
+        <div class="card section-card" formGroupName="faceOptions">
+          <h4>Rostros</h4>
+          <label class="switch-container">
+            <input type="checkbox" formControlName="maskFaces">
+            <span class="switch-slider"></span>
+            <span class="switch-label">Enmascarar rostros</span>
+          </label>
+          <div class="input-group">
+            <label for="pixelado">Intensidad de pixelado</label>
+            <div class="rango">
+              <input id="pixelado" type="range" min="1" max="100" formControlName="pixelationIntensity">
+              <span class="valor-rango">{{ valor('sensiaOptions.faceOptions.pixelationIntensity') }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card section-card" formGroupName="documentOptions">
+          <h4>Imágenes</h4>
+          <label class="switch-container">
+            <input type="checkbox" formControlName="removeImages">
+            <span class="switch-slider"></span>
+            <span class="switch-label">Eliminar imágenes</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- ============ LISTAS Y ZONAS ============ -->
+      <section class="panel" *ngIf="pestanaActiva === 'listas'" id="panel-listas" role="tabpanel"
+        aria-labelledby="pestana-listas">
+
+        <div class="card section-card" formGroupName="documentOptions">
+          <h4>Palabras</h4>
+          <div class="input-group">
+            <label for="bloqueadas">Censurar siempre (lista negra)</label>
+            <textarea id="bloqueadas" formControlName="blockedWords" rows="3"
+              placeholder="ej: confidencial; &#10;expediente"></textarea>
+            <small>Separadas por punto y coma (;). Se aplican a todos los documentos.</small>
+          </div>
+          <div class="input-group">
+            <label for="permitidas">No censurar nunca (lista blanca)</label>
+            <textarea id="permitidas" formControlName="allowedWords" rows="3"
+              placeholder="ej: Ayuntamiento; &#10;Registro General"></textarea>
+            <small>Separadas por punto y coma (;). Se aplican a todos los documentos.</small>
+          </div>
+        </div>
+
+        <div class="card section-card" formGroupName="documentOptions">
+          <div class="titulo-con-ayuda">
+            <h4>Zonas</h4>
+            <div class="help-icon" tabindex="0" aria-label="Zonas de referencia">
+              <i>i</i>
+              <div class="help-popup">
+                <strong>Zonas de referencia (X, Y, W, H)</strong>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Zona</th>
+                      <th>Coordenadas</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Cabecera Alta</td><td><code>0, 722, 595, 120</code></td></tr>
+                    <tr><td>Cabecera Alta Izquierda</td><td><code>0, 742, 150, 100</code></td></tr>
+                    <tr><td>Logotipo</td><td><code>0, 700, 200, 142</code></td></tr>
+                    <tr><td>Margen Derecho</td><td><code>540, 0, 55, 842</code></td></tr>
+                    <tr><td>Margen Izquierdo</td><td><code>0, 0, 145, 842</code></td></tr>
+                    <tr><td>Pie de Página</td><td><code>0, 0, 595, 100</code></td></tr>
+                    <tr><td>Zona Central</td><td><code>100, 200, 395, 442</code></td></tr>
+                  </tbody>
+                </table>
+                <p class="nota-ayuda">* Puntos sobre A4 (595 × 842), con el origen en la esquina inferior izquierda.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="zonas-fijas">Censuras fijas</label>
+            <input id="zonas-fijas" type="text" formControlName="fixedRedactionZones"
+              placeholder="ej: 0, 0, 595, 100; 540, 0, 55, 842"
+              [class.input-error]="invalido('sensiaOptions.documentOptions.fixedRedactionZones')">
+            <small *ngIf="invalido('sensiaOptions.documentOptions.fixedRedactionZones')" class="texto-error">
+              Formato incorrecto. Usa X, Y, W, H y separa cada zona con «;».
+            </small>
+            <small *ngIf="!invalido('sensiaOptions.documentOptions.fixedRedactionZones')">
+              Rectángulos X, Y, W, H separados por «;». Se censuran en todos los documentos.
+            </small>
+          </div>
+
+          <label class="switch-container">
+            <input type="checkbox" formControlName="preserveLogo">
+            <span class="switch-slider"></span>
+            <span class="switch-label">Preservar logotipo</span>
+          </label>
+
+          <div class="input-group">
+            <label for="zona-logo">Zona del logotipo</label>
+            <input id="zona-logo" type="text" formControlName="logoExclusionZone" placeholder="Ej: 0, 700, 200, 142"
+              [class.input-error]="invalido('sensiaOptions.documentOptions.logoExclusionZone')">
+            <small *ngIf="invalido('sensiaOptions.documentOptions.logoExclusionZone')" class="texto-error">
+              Formato incorrecto. Usa 4 números: X, Y, W, H.
+            </small>
+            <small *ngIf="!invalido('sensiaOptions.documentOptions.logoExclusionZone')">
+              Valores X, Y, W, H separados por comas. Déjalo vacío si no hay zona fija.
+            </small>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ AVANZADO ============ -->
+      <section class="panel" *ngIf="pestanaActiva === 'avanzado'" id="panel-avanzado" role="tabpanel"
+        aria-labelledby="pestana-avanzado">
+
+        <p class="aviso-avanzado">
+          Parámetros de los motores de detección. Cámbialos solo si sabes cómo afectan al resultado.
+        </p>
+
+        <div class="card section-card" formGroupName="documentOptions">
+          <h4>Entidades (NER)</h4>
+          <div class="input-group">
+            <label for="umbral-ner">Umbral de confianza</label>
+            <input id="umbral-ner" type="number" step="0.05" formControlName="redactNERScore">
+          </div>
+        </div>
+
+        <div class="card section-card" formGroupName="faceOptions">
+          <h4>Filtros de rostros</h4>
+          <div class="input-grid">
+            <div class="input-group">
+              <label for="min-ratio">Min Aspect Ratio</label>
+              <input id="min-ratio" type="number" step="0.1" formControlName="minFaceAspectRatio">
+            </div>
+            <div class="input-group">
+              <label for="max-ratio">Max Aspect Ratio</label>
+              <input id="max-ratio" type="number" step="0.1" formControlName="maxFaceAspectRatio">
+            </div>
+            <div class="input-group">
+              <label for="min-area">Min Face Area</label>
+              <input id="min-area" type="number" step="0.1" formControlName="minFaceArea">
+            </div>
+            <div class="input-group">
+              <label for="max-area">Max Face Area</label>
+              <input id="max-area" type="number" step="0.1" formControlName="maxFaceArea">
+            </div>
+          </div>
+        </div>
+
+        <div class="card section-card" formGroupName="yunetOptions">
+          <h4>Motor de rostros (YuNet)</h4>
+          <div class="input-grid">
+            <div class="input-group">
+              <label for="score">Score Threshold</label>
+              <input id="score" type="number" step="0.05" formControlName="scoreThreshold">
+            </div>
+            <div class="input-group">
+              <label for="nms">NMS Threshold</label>
+              <input id="nms" type="number" step="0.05" formControlName="nmsThreshold">
+            </div>
+            <div class="input-group full-width">
+              <label for="topk">Top K</label>
+              <input id="topk" type="number" formControlName="topK">
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+  </form>
+</div>

@@ -1,0 +1,45 @@
+FROM node:24-bookworm
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+ENV CHROME_BIN=/usr/bin/chromium
+ENV HOME=/tmp
+ENV XDG_CACHE_HOME=/tmp/.cache
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    chromium \
+    ca-certificates \
+    fontconfig \
+    fonts-dejavu \
+    fonts-liberation \
+    fonts-noto \
+    fonts-noto-cjk \
+    fonts-noto-color-emoji \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libgtk-3-0 \
+    libnss3 \
+    libxss1 \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    libgbm1 \
+    xdg-utils \
+    && mkdir -p /tmp/.cache \
+    && chmod -R 777 /tmp/.cache \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt/sensia-docs
+
+COPY package*.json ./
+
+RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+COPY scripts/build-docs-docker.sh /usr/local/bin/build-docs
+
+RUN chmod +x /usr/local/bin/build-docs
+
+WORKDIR /work/docs
+
+ENTRYPOINT ["build-docs"]

@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="SensiaService"
+    targetNamespace="http://sensia.github.io/"
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:tns="http://sensia.github.io/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <types>
+        <xsd:schema targetNamespace="http://sensia.github.io/">
+
+            <xsd:element name="AuthHeader">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="token" type="xsd:string" />
+                        <xsd:element name="cliente" type="xsd:string" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:complexType name="ServiceFaultType">
+                <xsd:sequence>
+                    <xsd:element name="errorCode" type="xsd:string" />
+                    <xsd:element name="errorMessage" type="xsd:string" />
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:element name="ServiceFault" type="tns:ServiceFaultType" />
+
+            <xsd:complexType name="ServiceStatus">
+                <xsd:sequence>
+                    <xsd:element name="result" type="tns:StatusEnum" />
+                    <xsd:element name="message" type="xsd:string" />
+                    <xsd:element name="cause" type="xsd:string" minOccurs="0" />
+                </xsd:sequence>
+            </xsd:complexType>
+
+
+            <xsd:complexType name="TaskStatus">
+                <xsd:sequence>
+                    <xsd:element name="processState" type="tns:ProcessStateEnum" minOccurs="0" />
+                    <xsd:element name="message" type="xsd:string" minOccurs="0" />
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="DocumentItem">
+                <xsd:sequence>
+                    <xsd:element name="fileName" type="xsd:string" />
+                    <xsd:element name="contentType" type="xsd:string" />
+                    <xsd:element name="fileContent" type="xsd:base64Binary" />
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="BatchDocumentItem">
+                <xsd:sequence>
+                    <xsd:element name="clientId" type="xsd:string" />
+                    <xsd:element name="document" type="tns:DocumentItem" />
+                    <xsd:element name="confirmedRedactions" type="tns:RedactionItem" minOccurs="0" maxOccurs="unbounded" />
+                </xsd:sequence>
+            </xsd:complexType>
+
+
+            <xsd:complexType name="DocumentList">
+                <xsd:sequence>
+                    <xsd:element name="document" type="tns:DocumentItem" minOccurs="0"
+                        maxOccurs="unbounded" />
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="BatchTicketItem">
+                <xsd:sequence>
+                    <xsd:element name="clientId" type="xsd:string" />
+                    <xsd:element name="serverTicketId" type="xsd:string" />
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:element name="submitBatchRequest">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="options" type="tns:ProcessingOptions" />
+                        <xsd:element name="documents" type="tns:BatchDocumentItem"
+                            maxOccurs="unbounded" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="submitBatchResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="status" type="tns:ServiceStatus" />
+                        <xsd:element name="tickets" type="tns:BatchTicketItem" minOccurs="0"
+                            maxOccurs="unbounded" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="getStatusRequest">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="ticketId" type="xsd:string" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="getStatusResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="ticketId" type="xsd:string" />
+                        <xsd:element name="processedDocument" type="tns:DocumentItem" minOccurs="0" />
+                        <xsd:element name="redactionResults" type="tns:RedactionItem"
+                            minOccurs="0" maxOccurs="unbounded"/>
+                        <xsd:element name="taskStatus" type="tns:TaskStatus" />
+                        <xsd:element name="status" type="tns:ServiceStatus" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="redactImageRequest">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="image" type="tns:DocumentItem" />
+                        <xsd:element name="faceOptions" type="tns:FaceMaskingOptions" minOccurs="0" />
+                        <xsd:element name="yunetOptions" type="tns:YunetOptions" minOccurs="0" />
+                        <xsd:element name="redactionPreview" type="xsd:boolean" minOccurs="0" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="redactImageResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="image" type="tns:DocumentItem" minOccurs="0" />
+                        <xsd:element name="redactionResults" type="tns:RedactionItem"
+                            minOccurs="0" maxOccurs="unbounded"/>
+                        <xsd:element name="status" type="tns:ServiceStatus" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="extractImagesRequest">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="document" type="tns:DocumentItem" />
+                        <xsd:element name="minWidth" type="xsd:int" default="0" minOccurs="0" />
+                        <xsd:element name="minHeight" type="xsd:int" default="0" minOccurs="0" />
+                        <xsd:element name="maxWidth" type="xsd:int" minOccurs="0" />
+                        <xsd:element name="maxHeight" type="xsd:int" minOccurs="0" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="extractImagesResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="images" type="tns:DocumentList" />
+                        <xsd:element name="status" type="tns:ServiceStatus" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:complexType name="ProcessingOptions">
+                <xsd:sequence>
+                    <xsd:element name="documentOptions" type="tns:DocumentRedactionOptions"
+                        minOccurs="0" />
+                    <xsd:element name="faceOptions" type="tns:FaceMaskingOptions" minOccurs="0" />
+                    <xsd:element name="yunetOptions" type="tns:YunetOptions" minOccurs="0" />
+                    <xsd:element name="qrOptions" type="tns:QROptions" minOccurs="0" />
+                    <xsd:element name="redactionPreview" type="xsd:boolean" minOccurs="0" />
+                    <xsd:element name="reconstructionMode" type="xsd:boolean" minOccurs="0" />                        
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="DocumentRedactionOptions">
+                <xsd:sequence>
+                    <xsd:element name="redactQRCodes" type="xsd:boolean" minOccurs="0" />
+                    <xsd:element name="redactNames" type="xsd:boolean" minOccurs="0" />
+                    <xsd:element name="redactNERNames" type="xsd:boolean" minOccurs="0" default="false"/>
+                    <xsd:element name="redactNEROrg" type="xsd:boolean" minOccurs="0" default="false"/>
+                    <xsd:element name="redactNERLoc" type="xsd:boolean" minOccurs="0" default="false"/>
+                    <xsd:element name="redactNERMisc" type="xsd:boolean" minOccurs="0" default="false"/>
+                    <xsd:element name="redactNERScore" type="xsd:float" minOccurs="0" default="0.65"/>
+                    <xsd:element name="removeImages" type="xsd:boolean" minOccurs="0" />
+                    <xsd:element name="preserveLogo" type="xsd:boolean" default="true" minOccurs="0" />
+                    <xsd:element name="logoExclusionZone" type="tns:Coordinate" minOccurs="0" />
+                    <xsd:element name="imageExclusionZones" type="tns:CoordinatesList" minOccurs="0" />
+                    <xsd:element name="fixedRedactionZones" type="tns:CoordinatesList" minOccurs="0" />
+                    <xsd:element name="allowedWords" type="tns:WordList" minOccurs="0" />
+                    <xsd:element name="blockedWords" type="tns:WordList" minOccurs="0" />
+                    <xsd:element name="redactionThickness" type="xsd:int" minOccurs="0" default="2"/>
+                    <xsd:element name="usePseudonyms" type="xsd:boolean" minOccurs="0" />
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="FaceMaskingOptions">
+                <xsd:sequence>
+                    <xsd:element name="maskFaces" type="xsd:boolean" default="true" minOccurs="0" />
+                    <xsd:element name="minFaceAspectRatio" type="xsd:float" default="0"
+                        minOccurs="0" />
+                    <xsd:element name="maxFaceAspectRatio" type="xsd:float" default="0"
+                        minOccurs="0" />
+                    <xsd:element name="minFaceArea" type="xsd:float" default="0" minOccurs="0" />
+                    <xsd:element name="maxFaceArea" type="xsd:float" default="0" minOccurs="0" />
+                    <xsd:element name="pixelationIntensity" type="xsd:int" default="70"
+                        minOccurs="0" />
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="YunetOptions">
+                <xsd:sequence>
+                    <xsd:element name="scoreThreshold" type="xsd:float" default="0.30" />
+                    <xsd:element name="nmsThreshold" type="xsd:float" default="0.45" />
+                    <xsd:element name="topK" type="xsd:int" default="5000" />
+                </xsd:sequence>
+            </xsd:complexType>
+
+
+            <xsd:complexType name="QROptions">
+                <xsd:sequence>
+                    <xsd:element name="maxQrPage" type="xsd:int" default="2" />
+                    <xsd:element name="maxQrFirstPage" type="xsd:int" default="4" />
+                    <xsd:element name="maxQrLastPage" type="xsd:int" default="3" />
+                    <xsd:element name="cloneQRMargin" type="xsd:boolean" default="true" />
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="WordList">
+                <xsd:sequence>
+                    <xsd:element name="words" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="CoordinatesList">
+                <xsd:sequence>
+                    <xsd:element name="coordinate" type="tns:Coordinate" minOccurs="0"
+                        maxOccurs="unbounded" />
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="Coordinate">
+                <xsd:sequence>
+                    <xsd:element name="x" type="xsd:float" />
+                    <xsd:element name="y" type="xsd:float" />
+                    <xsd:element name="w" type="xsd:float" />
+                    <xsd:element name="h" type="xsd:float" />
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="RedactionItem">
+                <xsd:sequence>
+                    <xsd:element name="detectionType" type="tns:DetectionTypeEnum" />
+                    <xsd:element name="subType" type="xsd:string" minOccurs="0" />
+                    <xsd:element name="action" type="tns:ActionStateEnum" />
+                    <xsd:element name="description" type="xsd:string" minOccurs="0" />
+                    <xsd:element name="text" type="xsd:string" minOccurs="0" />
+                    <xsd:element name="page" type="xsd:int" minOccurs="0" />
+                    <xsd:element name="coordinates" type="tns:Coordinate" />
+                    <xsd:element name="sourceDocumentHash" type="xsd:string" minOccurs="0" />
+                    <xsd:element name="apply" type="xsd:boolean" default="true" minOccurs="0" />
+                    <xsd:element name="pseudonym" type="xsd:string" minOccurs="0" />
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:simpleType name="ProcessStateEnum">
+                <xsd:restriction base="xsd:string">
+                    <xsd:enumeration value="QUEUED" />
+                    <xsd:enumeration value="PROCESSING" />
+                    <xsd:enumeration value="COMPLETED" />
+                    <xsd:enumeration value="NOT_FOUND" />
+                    <xsd:enumeration value="SATURADO" />
+                    <xsd:enumeration value="AUTH_ERROR" />
+                    <xsd:enumeration value="INVALID_DOCUMENT_ERROR" />
+                    <xsd:enumeration value="HASH_MISMATCH_ERROR" />                    
+                    <xsd:enumeration value="ERROR" />
+                </xsd:restriction>
+            </xsd:simpleType>
+
+            <xsd:simpleType name="ActionStateEnum">
+                <xsd:restriction base="xsd:string">
+                    <xsd:enumeration value="REDACTED" />
+                    <xsd:enumeration value="WHITELISTED" />
+                    <xsd:enumeration value="EXCLUDED_ZONE" />
+                    <xsd:enumeration value="REMOVED" />
+                </xsd:restriction>
+            </xsd:simpleType>
+
+            <xsd:simpleType name="StatusEnum">
+                <xsd:restriction base="xsd:string">
+                    <xsd:enumeration value="SUCCESS" />
+                    <xsd:enumeration value="WARNING" />
+                    <xsd:enumeration value="ERROR" />
+                </xsd:restriction>
+            </xsd:simpleType>
+
+            <xsd:simpleType name="DetectionTypeEnum">
+                <xsd:restriction base="xsd:string">
+                    <xsd:enumeration value="SENSITIVE_DATA" />
+                    <xsd:enumeration value="PERSON_NAME" />
+                    <xsd:enumeration value="NAMED_ENTITY" />
+                    <xsd:enumeration value="IMAGE" />
+                    <xsd:enumeration value="FIXED_ZONE" />
+                    <xsd:enumeration value="FACE" />
+                    <xsd:enumeration value="QR_CODE" />
+                </xsd:restriction>
+            </xsd:simpleType>
+        </xsd:schema>
+    </types>
+
+    <message name="AuthHeaderMessage">
+        <part name="header" element="tns:AuthHeader" />
+    </message>
+
+    <message name="ServiceFaultMessage">
+        <part name="fault" element="tns:ServiceFault" />
+    </message>
+
+    <message name="submitBatchInput">
+        <part name="parameters" element="tns:submitBatchRequest" />
+    </message>
+    <message name="submitBatchOutput">
+        <part name="parameters" element="tns:submitBatchResponse" />
+    </message>
+
+    <message name="getStatusInput">
+        <part name="parameters" element="tns:getStatusRequest" />
+    </message>
+    <message name="getStatusOutput">
+        <part name="parameters" element="tns:getStatusResponse" />
+    </message>
+
+    <message name="redactImageInput">
+        <part name="parameters" element="tns:redactImageRequest" />
+    </message>
+
+    <message name="redactImageOutput">
+        <part name="parameters" element="tns:redactImageResponse" />
+    </message>
+
+    <message name="extractImagesInput">
+        <part name="parameters" element="tns:extractImagesRequest" />
+    </message>
+
+    <message name="extractImagesOutput">
+        <part name="parameters" element="tns:extractImagesResponse" />
+    </message>
+
+    <portType name="SensiaServicePortType">
+        <operation name="submitBatch">
+            <input message="tns:submitBatchInput" />
+            <output message="tns:submitBatchOutput" />
+            <fault name="ServiceError" message="tns:ServiceFaultMessage" />
+        </operation>
+        <operation name="getStatus">
+            <input message="tns:getStatusInput" />
+            <output message="tns:getStatusOutput" />
+            <fault name="ServiceError" message="tns:ServiceFaultMessage" />
+        </operation>
+        <operation name="redactImage">
+            <input message="tns:redactImageInput" />
+            <output message="tns:redactImageOutput" />
+            <fault name="ServiceError" message="tns:ServiceFaultMessage" />
+        </operation>
+        <operation name="extractImages">
+            <input message="tns:extractImagesInput" />
+            <output message="tns:extractImagesOutput" />
+            <fault name="ServiceError" message="tns:ServiceFaultMessage" />
+        </operation>
+    </portType>
+
+    <binding name="SensiaServiceSOAPBinding" type="tns:SensiaServicePortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+
+        <operation name="submitBatch">
+            <soap:operation soapAction="http://sensia.github.io/SensiaService/submitBatch" />
+            <input>
+                <soap:header message="tns:AuthHeaderMessage" part="header" use="literal" />
+                <soap:body use="literal" />
+            </input>
+            <output>
+                <soap:body use="literal" />
+            </output>
+            <fault name="ServiceError">
+                <soap:fault name="ServiceError" use="literal" />
+            </fault>
+        </operation>
+
+        <operation name="getStatus">
+            <soap:operation soapAction="http://sensia.github.io/SensiaService/getStatus" />
+            <input>
+                <soap:header message="tns:AuthHeaderMessage" part="header" use="literal" />
+                <soap:body use="literal" />
+            </input>
+            <output>
+                <soap:body use="literal" />
+            </output>
+            <fault name="ServiceError">
+                <soap:fault name="ServiceError" use="literal" />
+            </fault>
+        </operation>
+
+        <operation name="redactImage">
+            <soap:operation
+                soapAction="http://sensia.github.io/SensiaService/redactImage" />
+            <input>
+                <soap:header message="tns:AuthHeaderMessage" part="header" use="literal" />
+                <soap:body use="literal" />
+            </input>
+            <output>
+                <soap:body use="literal" />
+            </output>
+            <fault name="ServiceError">
+                <soap:fault name="ServiceError" use="literal" />
+            </fault>
+
+        </operation>
+
+        <operation name="extractImages">
+            <soap:operation
+                soapAction="http://sensia.github.io/SensiaService/extractImages" />
+            <input>
+                <soap:header message="tns:AuthHeaderMessage" part="header" use="literal" />
+                <soap:body use="literal" />
+            </input>
+            <output>
+                <soap:body use="literal" />
+            </output>
+            <fault name="ServiceError">
+                <soap:fault name="ServiceError" use="literal" />
+            </fault>
+        </operation>
+    </binding>
+
+    <service name="SensiaService">
+        <port name="SensiaServicePort" binding="tns:SensiaServiceSOAPBinding">
+            <soap:address location="http://localhost:8080/SensiaService" />
+        </port>
+    </service>
+</definitions>

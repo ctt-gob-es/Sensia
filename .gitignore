@@ -1,0 +1,117 @@
+# ==========================================
+# GLOBAL MONOREPO DEFAULTS
+# ==========================================
+
+# OS Files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDEs & Editors (**/ para que aplique en todos los proyectos)
+.idea/
+*.swp
+*.swo
+*~
+.continueignore
+
+# ------------------------------------------
+# Secrets / Credentials
+# ------------------------------------------
+.env*
+*.env
+.envrc
+*env/
+*local-env
+.certbot.lock
+!.env.example
+!.env.sample
+!.env.template
+!.env.build
+
+*.pem
+*.key
+*.p12
+*.pfx
+*.p8
+*.jks
+*.keystore
+*.pass
+*.srl
+*.csr
+*.kdbx
+id_rsa
+id_ed25519
+.pypirc
+credentials.json
+service-account*.json
+.aws/
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Logs & Databases
+*.log
+log/
+logs/
+*.db
+*.sqlite
+*.sqlite3
+
+# Custom / Misc
+samples/
+tmp/
+temp/
+.workspace
+.cache/
+
+# ==========================================
+# LANGUAGES & FRAMEWORKS
+# ==========================================
+
+# Node / JS / Angular / Vite
+node_modules/
+dist/
+build/
+out/
+coverage/
+.angular/
+.vite/
+.npm/
+.next/
+.nuxt/
+.turbo/
+.nx/
+.pnpm-store/
+*.tsbuildinfo
+
+# Python (venv/, .venv/, env/ ya cubiertos por *env/)
+__pycache__/
+*.py[cod]
+venv-build/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Java / Maven / Gradle
+target/
+.gradle/
+*.class
+*.jar
+*.war
+!**/gradle/wrapper/gradle-wrapper.jar
+!**/.mvn/wrapper/maven-wrapper.jar
+.mtl.xml
+.layers.factorypath
+dependency-reduced-pom.xml
+
+# Machine Learning / Models
+*.onnx
+!backend-ws/src/main/resources/yunet/*.onnx
+*.onnx.data
+*.pt
+*.pth
+*.safetensors
+*.ckpt
+*.gguf
+*.h5

@@ -1,0 +1,13 @@
+<app-header 
+  *ngIf="showHeader()"
+  [user]="authService.currentUser()"
+  (onAccount)="goToAccount()"
+  (onSettings)="goToSettings()"
+  (onAdmin)="goToAdmin()"
+  (onLogout)="handleLogout()"
+  >
+</app-header>
+
+<main class="container">
+  <router-outlet></router-outlet>
+</main>

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <title>SensIA</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="manifest" href="manifest.webmanifest">
+</head>
+
+<body>
+  <app-root>
+
+    <div style="text-align: center; margin-top: 50px; font-family: sans-serif;">
+      <h2>Iniciando SensIA...</h2>
+      <p id="error-msg" style="color: red; display: none;">
+        Error crítico: No se pudo conectar con la configuración del servidor. <br>
+        Por favor, contacte con el administrador del sistema.
+      </p>
+    </div>
+
+    <script>
+      setTimeout(() => {
+        const errorMsg = document.getElementById('error-msg');
+        // Solo le cambia el estilo si el elemento sigue existiendo
+        if (errorMsg) errorMsg.style.display = 'block';
+      }, 3000);
+    </script>
+  </app-root>
+  <noscript>Activa JavaScript para usar esta aplicación.</noscript>
+</body>
+
+</html>

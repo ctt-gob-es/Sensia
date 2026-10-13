@@ -1,0 +1,52 @@
+services:
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.7.1
+    container_name: sensia-keycloak
+
+    command:
+      - start-dev
+      - --import-realm
+      - --hostname=https://localhost:18443
+      - --https-certificate-file=/opt/keycloak/certs/keycloak.crt
+      - --https-certificate-key-file=/opt/keycloak/certs/keycloak.key
+
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+
+    ports:
+      - "127.0.0.1:18443:8443"
+
+    volumes:
+      - ./dev/keycloak:/opt/keycloak/data/import:ro
+      - ./dev/keycloak/certs:/opt/keycloak/certs:ro
+
+
+  smtp4dev:
+    container_name: sensia-smtp4dev
+    build:
+      context: ./dev
+      dockerfile: smtp4dev/Dockerfile
+
+    network_mode: host
+
+    depends_on:
+      - keycloak
+
+    environment:
+      ServerOptions__Urls: http://127.0.0.1:5000
+      ServerOptions__Port: "2525"
+      ServerOptions__BindAddress: 127.0.0.1
+
+      ServerOptions__AuthenticationRequired: "true"
+      ServerOptions__SmtpAllowAnyCredentials: "false"
+
+      ServerOptions__SmtpEnabledAuthTypesWhenNotSecureConnection: XOAUTH2
+
+      ServerOptions__OAuth2Authority: https://localhost:18443/realms/sensia-dev
+      ServerOptions__OAuth2Audience: smtp4dev
+      ServerOptions__OAuth2Issuer: https://localhost:18443/realms/sensia-dev
+      
+      ServerOptions__Users__0__Username: dev@sensia.local
+      ServerOptions__Users__0__Password: dev-password

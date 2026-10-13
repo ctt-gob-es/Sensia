@@ -1,0 +1,5 @@
+# --- Sentencias del Tribunal Supremo (Test de Extracción) ---
+https://www.poderjudicial.es/search/contenidos.action?action=contentpdf&databasematch=TS&reference=11674521&optimize=20260401&publicinterface=true&tab=AN
+https://www.poderjudicial.es/search/contenidos.action?action=contentpdf&databasematch=TS&reference=11674520&optimize=20260401&publicinterface=true&tab=AN
+https://www.poderjudicial.es/search/contenidos.action?action=accessToPDF&publicinterface=true&tab=AN&reference=73a769f25460de02a0a8778d75e36f0d&encode=true&optimize=20260401&databasematch=AN
+https://www.poderjudicial.es/search/contenidos.action?action=accessToPDF&publicinterface=true&tab=AN&reference=6d82a753f58e9feea0a8778d75e36f0d&encode=true&optimize=20260401&databasematch=AN

@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+venv/
+venv-build/
+models/
+certs/
+tests/
+.pytest_cache/
+**/__pycache__/
+*.pyc
+src/protos/*_pb2*.py
+.git/

@@ -1,0 +1,19 @@
+// Desarrollo: los servicios corren en el host; lee ficheros de log.
+local.file_match "sensia_dev" {
+  path_targets = [
+    {"__path__" = "/var/log/sensia/backend-app/*.log", "service" = "backend-app"},
+    {"__path__" = "/var/log/sensia/backend-ws/*.log",  "service" = "backend-ws"},
+    {"__path__" = "/var/log/sensia/backend-ner/*.log", "service" = "backend-ner"},
+  ]
+}
+
+loki.source.file "sensia_dev" {
+  targets    = local.file_match.sensia_dev.targets
+  forward_to = [loki.write.local.receiver]
+}
+
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

@@ -1,0 +1,113 @@
+<div class="comparador">
+
+  <header class="toolbar">
+    <div class="toolbar-group">
+      <div class="titulo">
+        <h2>Comparación</h2>
+        <span class="nombre" *ngIf="nombre" [title]="nombre">{{ nombre }}</span>
+      </div>
+    </div>
+
+    <div class="toolbar-group" role="group" aria-label="Zoom">
+      <button type="button" class="btn btn-icon" (click)="cambiarZoom(-1)" [disabled]="zoom <= ZOOM_MIN"
+        title="Alejar" aria-label="Alejar">−</button>
+      <button type="button" class="zoom-level" (click)="restablecerZoom()" title="Volver al 100 %">
+        {{ zoom * 100 | number:'1.0-0' }}%
+      </button>
+      <button type="button" class="btn btn-icon" (click)="cambiarZoom(1)" [disabled]="zoom >= ZOOM_MAX"
+        title="Acercar" aria-label="Acercar">+</button>
+    </div>
+
+    <div class="toolbar-group">
+      <button #btnVolver type="button" class="btn btn-back" (click)="onClose()">← Volver a la lista</button>
+      <button type="button" class="btn btn-outline" (click)="rotarAmbos()" title="Gira los dos documentos 90°">
+        ⟳ Girar ambos
+      </button>
+      <label class="sincronizar" title="Al desplazar un documento, el otro le sigue">
+        <span class="toggle-switch">
+          <input type="checkbox" [checked]="sincronizado" (change)="alternarSincronizacion()">
+          <span class="slider"></span>
+        </span>
+        Desplazamiento sincronizado
+      </label>
+    </div>
+  </header>
+
+  <p class="aviso-visor" *ngIf="paginasDistintas" role="status">
+    ⚠️ El original tiene {{ paginas.A }} páginas y el anonimizado {{ paginas.B }}; la sincronización será aproximada.
+  </p>
+
+  <div class="paneles">
+
+    <section class="panel" aria-label="Documento original">
+      <div class="panel-cabecera">
+        <span class="badge badge-original">Original</span>
+        <span class="panel-meta" *ngIf="paginas.A">{{ paginas.A }} {{ paginas.A === 1 ? 'página' : 'páginas' }}</span>
+        <div class="panel-acciones">
+          <button type="button" class="btn-icon-sm" (click)="rotar('A', -1)" title="Girar a la izquierda"
+            aria-label="Girar el original a la izquierda">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          </button>
+          <button type="button" class="btn-icon-sm" (click)="rotar('A', 1)" title="Girar a la derecha"
+            aria-label="Girar el original a la derecha">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.13-9.36L23 10"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="panel-contenido">
+        <ng-container *ngIf="hayA; else sinDatos">
+          <div *ngIf="isImage" class="contenedor-imagen" #imageContainerA>
+            <img [src]="imgA" alt="Documento original" [style.width.%]="zoom * 100"
+              [style.transform]="'rotate(' + rotacion.A + 'deg)'" (load)="alCargarImagen()">
+          </div>
+          <pdf-viewer *ngIf="!isImage" #pdfViewerA class="visor-pdf" [src]="pdfA!" [c-maps-url]="'/cmaps/'" [render-text]="true"
+            [original-size]="false" [fit-to-page]="true" [show-all]="true" [zoom]="zoom"
+            [rotation]="rotacion.A" (after-load-complete)="alCargarPdf('A', $event)">
+          </pdf-viewer>
+        </ng-container>
+      </div>
+    </section>
+
+    <section class="panel" aria-label="Documento anonimizado">
+      <div class="panel-cabecera">
+        <span class="badge badge-anonimizado" [class.definitivo]="definitivo">
+          {{ definitivo ? 'Anonimizado · definitivo' : 'Anonimizado · vista previa' }}
+        </span>
+        <span class="panel-meta" *ngIf="paginas.B">{{ paginas.B }} {{ paginas.B === 1 ? 'página' : 'páginas' }}</span>
+        <div class="panel-acciones">
+          <button type="button" class="btn-icon-sm" (click)="rotar('B', -1)" title="Girar a la izquierda"
+            aria-label="Girar el anonimizado a la izquierda">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          </button>
+          <button type="button" class="btn-icon-sm" (click)="rotar('B', 1)" title="Girar a la derecha"
+            aria-label="Girar el anonimizado a la derecha">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.13-9.36L23 10"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="panel-contenido">
+        <ng-container *ngIf="hayB; else sinDatos">
+          <div *ngIf="isImage" class="contenedor-imagen" #imageContainerB>
+            <img [src]="imgB" alt="Documento anonimizado" [style.width.%]="zoom * 100"
+              [style.transform]="'rotate(' + rotacion.B + 'deg)'" (load)="alCargarImagen()">
+          </div>
+          <pdf-viewer *ngIf="!isImage" #pdfViewerB class="visor-pdf" [src]="pdfB!" [c-maps-url]="'/cmaps/'" [render-text]="true"
+            [original-size]="false" [fit-to-page]="true" [show-all]="true" [zoom]="zoom"
+            [rotation]="rotacion.B" (after-load-complete)="alCargarPdf('B', $event)">
+          </pdf-viewer>
+        </ng-container>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<ng-template #sinDatos>
+  <div class="sin-datos">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+      <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+      <polyline points="13 2 13 9 20 9"></polyline>
+    </svg>
+    <p>Documento no disponible</p>
+  </div>
+</ng-template>

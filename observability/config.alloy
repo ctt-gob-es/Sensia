@@ -1,0 +1,39 @@
+// Recogida de logs de los contenedores de SensIA y envío a Loki.
+
+discovery.docker "sensia" {
+  host = "tcp://docker-proxy:2375"
+
+  // Solo los contenedores de este proyecto (name: sensia en docker-compose.yml)
+  filter {
+    name   = "label"
+    values = ["com.docker.compose.project=sensia"]
+  }
+}
+
+discovery.relabel "sensia" {
+  targets = []
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "service"
+  }
+}
+
+loki.source.docker "sensia" {
+  host          = "tcp://docker-proxy:2375"
+  targets       = discovery.docker.sensia.targets
+  relabel_rules = discovery.relabel.sensia.rules
+  forward_to    = [loki.write.local.receiver]
+}
+
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

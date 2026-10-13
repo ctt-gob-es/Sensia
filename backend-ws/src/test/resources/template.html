@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Liquidación de Prueba</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            margin: 40px;
+            color: #222;
+        }
+
+        .header {
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .header:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+        .logo-area {
+            width: 70%;
+            float: left;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .qr-area {
+            width: 25%;
+            float: right;
+            text-align: right;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 18px;
+            margin: 20px 0;
+            font-weight: bold;
+            text-transform: uppercase;
+            background-color: #eee;
+            padding: 10px;
+            clear: both;
+        }
+
+        .box {
+            border: 1px solid #444;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            position: relative;
+            clear: both;
+        }
+
+        .box-title {
+            position: absolute;
+            top: -10px;
+            left: 15px;
+            background: white;
+            padding: 0 5px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .row {
+            width: 100%;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .col {
+            float: left;
+        }
+
+        .label {
+            font-weight: bold;
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .value {
+            font-size: 14px;
+            font-family: monospace;
+            font-size: 15px;
+        }
+
+        .text-value {
+            font-family: inherit;
+            font-size: 15px;
+        }
+
+        .footer {
+            margin-top: 40px;
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
+            text-align: center;
+            font-size: 11px;
+            color: #666;
+            clear: both;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            clear: both;
+        }
+
+        th,
+        td {
+            border: 1px solid #999;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f5f5f5;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .amount {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .barcode {
+            margin-top: 15px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="logo-area">
+            <h3>AYUNTAMIENTO DE PRUEBAS</h3>
+            <div style="margin-top: 15px;">
+                <span class="label">Fecha de Emisión:</span> <span class="text-value">03/03/2026</span><br />
+                <span class="label">Nº de Expediente:</span> <span class="text-value">EXP-2026-998877</span>
+            </div>
+        </div>
+        <div class="qr-area">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&amp;data=ID:87654321X-TOTAL:143.80"
+                alt="QR Code" />
+        </div>
+    </div>
+
+    <div class="title">Liquidación - Impuesto sobre Vehículos de Tracción Mecánica</div>
+
+    <div class="box" style="margin-top: 25px;">
+        <div class="box-title">SUJETO PASIVO / INTERESADO</div>
+        
+        <div class="row">
+            <div class="col" style="width: 68%;">
+                <div class="label">Apellidos y Nombre / Razón Social</div>
+                <div class="text-value">ESPAÑOL ESPAÑOL, JUAN</div>
+            </div>
+            <div class="col" style="width: 30%;">
+                <div class="label">N.I.F. / C.I.F.</div>
+                <div class="value">87654321X</div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col" style="width: 100%;">
+                <div class="label">Domicilio Fiscal</div>
+                <div class="text-value">CALLE FALSA 123, PISO 4B, 03002 ALICANTE/ALACANT (ALICANTE)</div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col" style="width: 48%;">
+                <div class="label">Teléfono de Contacto</div>
+                <div class="value">+34 600 123 456</div>
+            </div>
+            <div class="col" style="width: 48%;">
+                <div class="label">Correo Electrónico</div>
+                <div class="value">juan.español@emaildeprueba.es</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="box">
+        <div class="box-title">DATOS DE PAGO Y DOMICILIACIÓN</div>
+        <div class="row">
+            <div class="col" style="width: 48%;">
+                <div class="label">Cuenta Bancaria (IBAN)</div>
+                <div class="value">ES91 1234 5678 9012 3456 7890</div>
+            </div>
+            <div class="col" style="width: 48%;">
+                <div class="label">Tarjeta Vinculada</div>
+                <div class="value">4532 1111 2222 3333</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="box">
+        <div class="box-title">OBJETO TRIBUTARIO</div>
+        <div class="row">
+            <div class="col" style="width: 30%;">
+                <div class="label">Matrícula</div>
+                <div class="value">1234 BCD</div>
+            </div>
+            <div class="col" style="width: 33%;">
+                <div class="label">Bastidor</div>
+                <div class="value">VSSZZZ12345678900</div>
+            </div>
+            <div class="col" style="width: 33%;">
+                <div class="label">Marca y Modelo</div>
+                <div class="text-value">SEAT LEON 1.9 TDI</div>
+            </div>
+        </div>
+    </div>
+
+    <table>
+        <tr>
+            <th>Concepto / Descripción</th>
+            <th>Ejercicio</th>
+            <th>Cuota Íntegra</th>
+        </tr>
+        <tr>
+            <td class="text-value">IVTM - TURISMOS DE 12 A 15,99 CABALLOS FISCALES</td>
+            <td class="value">2026</td>
+            <td class="value">143,80 €</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="text-align: right; font-weight: bold; font-size: 16px;">TOTAL A INGRESAR:</td>
+            <td class="amount">143,80 €</td>
+        </tr>
+    </table>
+
+    <div class="footer">
+        Documento generado para pruebas de integración SOAP - Sistema SensiaService.<br />
+        Referencia de cobro en cajeros / ventanilla: <strong>9090 9090 9090 9090 9090</strong>
+
+        <div class="barcode">
+            <img src="https://bwipjs-api.metafloor.com/?bcid=code128&amp;text=ES-9090-9090-9090-9090-9090" alt="Código de Barras" style="height: 50px;" />
+            <br />
+            <span style="font-family: monospace; font-size: 10px;">ES-9090-9090-9090-9090-9090</span>
+        </div>    </div>
+
+</body>
+
+</html>

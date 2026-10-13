@@ -1,0 +1,162 @@
+<div class="revision-layout" *ngIf="doc">
+
+  <div class="viewer-panel">
+
+    <div class="toolbar">
+      <div class="toolbar-group">
+        <button class="btn btn-icon" (click)="cambiarZoom(-0.2)" title="Alejar">-</button>
+        <span class="zoom-level">{{ (zoom * 100) | number:'1.0-0' }}%</span>
+        <button class="btn btn-icon" (click)="cambiarZoom(0.2)" title="Acercar">+</button>
+      </div>
+
+      <div class="toolbar-group pagination" *ngIf="esPdf">
+        <button class="btn btn-icon" (click)="cambiarPagina(-1)" [disabled]="currentPage === 1">◀</button>
+        <span>Página {{ currentPage }} de {{ totalPages }}</span>
+        <button class="btn btn-icon" (click)="cambiarPagina(1)" [disabled]="currentPage === totalPages">▶</button>
+      </div>
+
+      <div class="toolbar-group" *ngIf="esPdf && !soloLectura">
+        <button type="button" class="btn btn-outline btn-zona" [class.activo]="modoZona"
+          [attr.aria-pressed]="modoZona" [disabled]="procesando || !paginasListas || !mostrandoOriginal" (click)="alternarModoZona()"
+          title="En la versión «Original»: arrastra sobre la página, o marca dos esquinas opuestas. La zona se censura en todas las páginas; podrás desactivarla en cada una desde el panel">
+          {{ modoZona ? 'Cancelar zona' : 'Marcar zona' }}
+        </button>
+      </div>
+
+      <div class="segmented" role="group" aria-label="Versión del documento">
+        <button type="button" [class.activo]="!mostrandoOriginal" [disabled]="!tieneResultado"
+          [attr.aria-pressed]="!mostrandoOriginal" (click)="mostrarVersion(false)">Anonimizado</button>
+        <button type="button" [class.activo]="mostrandoOriginal"
+          [attr.aria-pressed]="mostrandoOriginal" (click)="mostrarVersion(true)">Original</button>
+      </div>
+    </div>
+
+    <div class="aviso-visor" *ngIf="mensaje" role="status" aria-live="polite">⚠️ {{ mensaje }}</div>
+
+    <div class="barra-pendientes" *ngIf="hayPendientes" role="region" aria-label="Cambios pendientes">
+      <span class="pendientes-resumen">
+        {{ pendientes.length }} {{ pendientes.length === 1 ? 'cambio pendiente' : 'cambios pendientes' }}
+      </span>
+      <ul class="chips">
+        <li class="chip" *ngFor="let p of pendientes; let i = index">
+          <span [title]="tituloPendiente(p)">{{ textoPendiente(p) }}</span>
+          <button type="button" (click)="quitarPendiente(i)" [attr.aria-label]="'Quitar ' + textoPendiente(p)">×</button>
+        </li>
+      </ul>
+      <div class="pendientes-acciones">
+        <button type="button" class="btn btn-outline" (click)="descartarPendientes()">Descartar</button>
+        <button type="button" class="btn btn-primary" [disabled]="!puedeAplicar" (click)="aplicarPendientes()"
+          title="Se volverá a analizar el documento conservando tus decisiones del panel">
+          Aplicar
+        </button>
+      </div>
+    </div>
+
+    <p class="ayuda-visor" *ngIf="esPdf && !hayPendientes">{{ ayudaVisor }}</p>
+
+    <div class="document-container" #visor>
+      <pdf-viewer *ngIf="esPdf" [src]="pdfSource" [c-maps-url]="'/cmaps/'" [zoom]="zoom" [show-all]="false" [page]="currentPage"
+        [original-size]="false" [fit-to-page]="true" [render-text]="true" (after-load-complete)="onPdfLoaded($event)"
+        class="pdf-viewer">
+      </pdf-viewer>
+
+      <div class="image-viewer" *ngIf="!esPdf">
+        <img [src]="pdfSource" alt="Documento" [style.transform]="'scale(' + zoom + ')'">
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar-panel">
+
+    <div class="sidebar-top">
+      <button type="button" class="btn btn-back" (click)="volver()">← Volver</button>
+      <div class="status-badge processing" *ngIf="procesando">
+        <div class="spinner"></div> Procesando…
+      </div>
+    </div>
+
+    <div class="bulk-actions" *ngIf="!soloLectura">
+      <button type="button" class="btn btn-outline" [disabled]="!puedeReprocesar" (click)="abrirReprocesar()"
+        title="Cambia los ajustes de este documento y vuelve a analizarlo">
+        Repetir análisis
+      </button>
+      <button type="button" class="btn btn-outline" *ngIf="todasDetecciones.length > 0" [disabled]="!puedeActualizar"
+        (click)="actualizarVistaPrevia()" title="Regenera la vista previa con las marcas activadas y desactivadas">
+        Actualizar vista previa
+      </button>
+      <button type="button" class="btn btn-success" [disabled]="!puedeConfirmar" (click)="confirmar()"
+        [attr.title]="hayPendientes ? 'Aplica o descarta antes los cambios pendientes del visor'
+          : 'Genera la versión definitiva y vuelve a la lista'">
+        Confirmar
+      </button>
+    </div>
+
+    <div class="status-badge error" *ngIf="doc.status === DocState.ERROR">❌ {{ doc.resultMessage }}</div>
+    <div class="status-badge success" *ngIf="mensajeFin">✅ {{ mensajeFin }}</div>
+    <div class="status-badge warning" *ngIf="doc.avisoMessage">⚠️ {{ doc.avisoMessage }}</div>
+
+    <div class="sidebar-header">
+      <div class="cabecera-fila">
+        <h3>Detecciones · Pág. {{ currentPage }}</h3>
+        <span class="estado-version" *ngIf="textoVersion">{{ textoVersion }}</span>
+      </div>
+      <p class="subtitle">{{ deteccionesPagina.length }} en esta página · {{ todasDetecciones.length }} en total</p>
+    </div>
+
+    <div class="sidebar-content">
+      <div class="empty-state" *ngIf="!tieneResultado && !procesando">
+        Este documento no tiene resultado. Usa «Repetir análisis» para procesarlo de nuevo.
+      </div>
+      <div class="empty-state" *ngIf="tieneResultado && deteccionesPagina.length === 0">
+        No se detectaron elementos en esta página.
+      </div>
+
+      <div class="deteccion" *ngFor="let item of deteccionesPagina" [class.no-censurada]="!estaCensurada(item)">
+
+        <span class="deteccion-icono" aria-hidden="true">{{ getIcono(item.detectionType) }}</span>
+
+        <div class="deteccion-texto">
+          <span class="deteccion-valor" *ngIf="item.text" [title]="item.text">{{ item.text }}</span>
+          <span class="deteccion-valor zona" *ngIf="!item.text && infoDe(item).zona as zona">
+            <span class="zona-id" [title]="infoDe(item).tituloZona || ''">{{ zona }}</span>{{ infoDe(item).coordenadas }}
+          </span>
+          <span class="deteccion-valor" *ngIf="!item.text && !infoDe(item).zona">{{ nombreTipo(item) }}</span>
+
+          <span class="deteccion-meta">
+            <span *ngIf="item.text || infoDe(item).zona" [title]="item.detectionType">{{ nombreTipo(item) }}</span>
+            <span class="subtipo" *ngIf="item.subType">{{ item.subType }}</span>
+            <span class="apariciones" *ngIf="infoDe(item).apariciones as apariciones">{{ apariciones }}</span>
+          </span>
+        </div>
+
+        <label class="toggle-switch" [title]="tituloInterruptor(item)">
+          <input type="checkbox" [checked]="estaCensurada(item)" [disabled]="procesando || soloLectura"
+            [attr.aria-label]="'Censurar ' + nombreDeteccion(item)" (click)="toggleDeteccion(item, $event)">
+          <span class="slider"></span>
+        </label>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Aparece al soltar una selección de texto en el visor.
+       mousedown no se propaga a la selección: así no se pierde al pulsar el botón. -->
+  <button type="button" class="btn-flotante" *ngIf="seleccion && !procesando && !ajustesEnEdicion"
+    [style.left.px]="seleccion.x" [style.top.px]="seleccion.y"
+    (mousedown)="$event.preventDefault()" (click)="censurarSeleccion()">
+    Censurar siempre «{{ seleccion.texto | slice:0:40 }}{{ seleccion.texto.length > 40 ? '…' : '' }}»
+  </button>
+
+  <!-- Aviso del panel de detecciones: «Desactivar en todas» y «Deshacer» -->
+  <div class="aviso-panel" *ngIf="avisoPanel && !procesando" role="status" aria-live="polite">
+    <span class="aviso-panel-texto">{{ avisoPanel.texto }}</span>
+    <button type="button" *ngIf="avisoPanel.accion" (click)="ejecutarAvisoPanel()">{{ avisoPanel.accion }}</button>
+    <button type="button" class="cerrar" (click)="cerrarAvisoPanel()" aria-label="Cerrar aviso">×</button>
+  </div>
+
+</div>
+
+<app-doc-reprocess *ngIf="ajustesEnEdicion as ajustes" [ajustes]="ajustes" [inicial]="ajustesIniciales"
+  [soloAnalisis]="!tieneResultado" (cancel)="cerrarReprocesar()" (confirm)="onReprocesarConfirm($event)">
+</app-doc-reprocess>

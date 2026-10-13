@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "backend-ws (debug)",
+      "request": "launch",
+      "mainClass": "io.github.sensia.boot.Servidor",
+      "cwd": "${workspaceFolder}/backend-ws",
+      "envFile": "${workspaceFolder}/backend-ws/.env",
+      "vmArgs": "-Djava.library.path=/usr/local/share/java/opencv4/",
+      "preLaunchTask": "backend-ws: dev-env"
+    }
+  ]
+}

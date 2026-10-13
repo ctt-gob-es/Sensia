@@ -1,0 +1,29 @@
+# Fuentes de datos de Grafana, creadas automáticamente al arrancar
+apiVersion: 1
+
+datasources:
+  - name: Loki
+    uid: loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    isDefault: true
+    jsonData:
+      derivedFields:
+        # Si una línea de log lleva trace_id, enlaza con la traza en Tempo
+        - name: TraceID
+          matcherRegex: '(?i)trace_?id"?[=:]\s*"?(\w+)'
+          url: '$${__value.raw}'
+          datasourceUid: tempo
+
+  - name: Tempo
+    uid: tempo
+    type: tempo
+    access: proxy
+    url: http://tempo:3200
+    jsonData:
+      tracesToLogsV2:
+        datasourceUid: loki
+        filterByTraceID: true
+        spanStartTimeShift: "-5m"
+        spanEndTimeShift: "5m"

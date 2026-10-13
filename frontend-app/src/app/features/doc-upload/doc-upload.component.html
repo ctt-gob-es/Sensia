@@ -1,0 +1,80 @@
+<div class="container">
+  <div class="upload-header">
+    <label for="file-upload" class="custom-file-upload">
+      {{ enProceso ? '+ Seleccionar más archivos' : '+ Seleccionar archivos' }}
+    </label>
+    <input id="file-upload" type="file" (change)="onFileSelected($event)" accept=".pdf,.jpg,.jpeg,.png" multiple>
+    <span class="upload-hint">PDF, JPG o PNG · hasta {{ config.maxUploadSizeMB() }} MB por archivo</span>
+    <button type="button" class="btn btn-text" *ngIf="documentService.documents().length > 0" (click)="vaciar()">
+      Vaciar bandeja
+    </button>
+  </div>
+
+  <p class="empty-state" *ngIf="documentService.documents().length === 0">
+    Aún no hay documentos. Selecciona uno o varios para anonimizarlos.
+  </p>
+
+  <div class="gallery-container" *ngIf="documentService.documents().length > 0">
+    <div *ngFor="let doc of documentService.documents()" class="document-card"
+      [class.marcado]="estaMarcado(doc)" (click)="alternarMarca(doc, $event)">
+
+      <div class="doc-left-section">
+        <div class="doc-preview" [class.clicable]="puedeRevisar(doc)" (click)="verRevision(doc)"
+          [attr.title]="puedeRevisar(doc) ? (doc.modificadoEnRevision ? 'Ver revisión' : 'Revisar') : null">
+          <ng-container *ngIf="doc.file.type === 'application/pdf'">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z"
+                stroke="#94a3b8" stroke-width="2" />
+              <path d="M14 2V8H20" stroke="#94a3b8" stroke-width="2" />
+            </svg>
+          </ng-container>
+          <ng-container *ngIf="doc.file.type.startsWith('image/')">
+            <img [src]="'data:' + doc.file.type + ';base64,' + doc.originalBase64" alt="" class="preview-thumb">
+          </ng-container>
+        </div>
+
+        <div class="doc-info">
+          <span class="file-name" [title]="doc.file.name">{{ doc.file.name }}</span>
+          <span class="file-meta" *ngIf="estado(doc) as e">
+            <span>{{ (doc.file.size / 1024).toFixed(0) }} KB</span>
+            <span>·</span>
+            <span class="estado" [ngClass]="e.clase">
+              <span class="spinner" *ngIf="e.clase === 'procesando'"></span>{{ e.texto }}
+            </span>
+          </span>
+          <span class="detalle-error" *ngIf="doc.status === DocState.ERROR && doc.resultMessage">
+            {{ doc.resultMessage }}
+          </span>
+          <span class="detalle-ok" *ngIf="mensajeFin(doc) as m">✅ {{ m }}</span>
+          <span class="aviso" *ngIf="doc.avisoMessage">⚠️ {{ doc.avisoMessage }}</span>
+        </div>
+      </div>
+
+      <div class="doc-actions">
+        <button type="button" class="btn btn-secondary" [disabled]="!puedeRevisar(doc)" (click)="revisar(doc)"
+          [attr.title]="doc.modificadoEnRevision ? 'Descarta la revisión anterior y vuelve a analizar el documento' : null">
+          Revisar
+        </button>
+        <button type="button" class="btn btn-secondary" *ngIf="puedeComparar(doc)" (click)="comparar(doc)"
+          title="Original y anonimizado lado a lado">
+          Comparar
+        </button>        
+        <button type="button" class="btn btn-primary" [disabled]="!puedeDescargar(doc)" (click)="descargar(doc)"
+          [attr.title]="puedeDescargar(doc) ? null : 'Disponible cuando se confirme la revisión'">
+          Descargar
+        </button>
+        <button type="button" class="btn btn-text-eliminar" (click)="eliminar(doc)"
+          [attr.aria-label]="'Eliminar ' + doc.file.name">
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-comparador" *ngIf="comparando as c" role="dialog" aria-modal="true"
+  aria-label="Comparación de documentos">
+  <app-doc-comparator [originalSrc]="c.originalBase64" [redactedSrc]="c.finalBase64"
+    [mimeType]="c.file.type" [nombre]="c.file.name" [definitivo]="c.status === DocState.COMPLETED"
+    (close)="comparando = null">
+  </app-doc-comparator>
+</div>

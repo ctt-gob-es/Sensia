@@ -1,0 +1,7 @@
+  .env
+  .env.*
+  !.env.example
+  bdd/
+  logs/
+  dev/
+  node_modules/

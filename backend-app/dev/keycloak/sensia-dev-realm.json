@@ -1,0 +1,55 @@
+{
+  "realm": "sensia-dev",
+  "enabled": true,
+  "sslRequired": "none",
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 86400,
+  "ssoSessionMaxLifespan": 604800,
+  "clientSessionIdleTimeout": 86400,
+  "clientSessionMaxLifespan": 604800,
+
+  "clients": [
+    {
+      "clientId": "sensia-mail",
+      "name": "SensIA Mail Development",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "sensia-dev-secret",
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "protocolMappers": [
+        {
+          "name": "smtp4dev-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.custom.audience": "smtp4dev",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "dev@sensia.local",
+      "email": "dev@sensia.local",
+      "firstName": "SensIA",
+      "lastName": "Developer",
+      "emailVerified": true,
+      "enabled": true,
+      "requiredActions": [],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "sensia-dev-password",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}

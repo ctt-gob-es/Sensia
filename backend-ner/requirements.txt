@@ -1,0 +1,11 @@
+grpcio==1.84.0
+grpcio-health-checking==1.84.0
+grpcio-tools==1.84.0
+onnxruntime==1.30.0
+transformers==5.19.0
+pydantic-settings==2.15.0
+python-json-logger==4.2.0
+numpy==2.5.3
+opentelemetry-api==1.45.1
+opentelemetry-sdk==1.45.1
+opentelemetry-exporter-otlp-proto-grpc==1.45.1

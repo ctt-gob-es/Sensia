@@ -1,0 +1,308 @@
+:host {
+  --navbar-bg-color: #ffffff;
+  --navbar-text-color: #495057;
+  --navbar-brand-color: #007bff;
+  --navbar-link-hover-bg: #f8fbff;
+  --navbar-border-color: #eaeaea;
+}
+
+/* =========================================
+   CONTENEDOR PRINCIPAL
+   ========================================= */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 20px 15px;
+  box-sizing: border-box;
+}
+
+/* =========================================
+   CABECERA Y SUBIDA
+   ========================================= */
+.upload-header {
+  position: sticky;
+  top: 64px;
+  z-index: 900;
+  background-color: #ffffff;
+  padding: 10px 0;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 4px 16px;
+}
+
+input[type="file"] {
+  display: none;
+}
+
+.custom-file-upload {
+  border: 2px dashed #007bff;
+  color: #007bff;
+  display: inline-block;
+  padding: 8px 20px;
+  cursor: pointer;
+  background-color: #f8fbff;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.custom-file-upload:hover {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.upload-hint {
+  font-size: 0.85rem;
+  color: #64748b;
+  order: 1;
+  flex-basis: 100%;
+  text-align: center;
+}
+
+.upload-header .btn-text {
+  border-color: #e2e8f0;
+  padding: 10px 16px;
+}
+
+.empty-state {
+  margin-top: 48px;
+  text-align: center;
+  color: #64748b;
+}
+
+/* =========================================
+   LISTA DE DOCUMENTOS (TARJETAS)
+   ========================================= */
+.gallery-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.document-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 15px 20px;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  transition: box-shadow 0.2s;
+  cursor: pointer;
+}
+
+.document-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.doc-left-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  min-width: 0;
+}
+
+.doc-preview {
+  width: 70px;
+  height: 70px;
+  flex-shrink: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8fafc;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.doc-preview.clicable {
+  cursor: pointer;
+}
+
+.doc-preview.clicable:hover {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+.preview-thumb {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.doc-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.file-name {
+  font-weight: 600;
+  color: #333;
+  font-size: 1.05rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: #777;
+  font-size: 0.85rem;
+}
+
+/* =========================================
+   ESTADO DEL DOCUMENTO
+   ========================================= */
+.estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.estado.procesando { color: #495057; }
+.estado.pendiente  { color: #b45309; }
+.estado.listo      { color: #15803d; }
+.estado.error      { color: #b91c1c; }
+
+.detalle-error {
+  font-size: 0.85rem;
+  color: #b91c1c;
+}
+
+.aviso {
+  font-size: 0.85rem;
+  color: #92400e;
+}
+
+/* =========================================
+   ACCIONES
+   ========================================= */
+.doc-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: opacity 0.2s, background-color 0.2s, color 0.2s;
+}
+
+.btn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-secondary {
+  background-color: #ffffff;
+  color: #007bff;
+  border-color: #007bff;
+}
+
+.btn-text {
+  background-color: transparent;
+  color: #6b7280;
+}
+
+
+.btn-text-eliminar {
+  background-color: transparent;
+  border-color: #e2e8f0;
+  padding: 10px 16px;
+  color: #6b7280;
+}
+
+.btn-text:hover:not(:disabled) {
+  opacity: 1;
+  color: #dc3545;
+  background-color: #fdecee;
+}
+
+/* =========================================
+   ANIMACIÓN SPINNER CSS
+   ========================================= */
+.spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #495057;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* =========================================
+   PANTALLAS ESTRECHAS
+   ========================================= */
+@media (max-width: 640px) {
+  .document-card {
+    flex-direction: column;
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .doc-actions {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+}
+
+
+.detalle-ok {
+  font-size: 0.85rem;
+  color: #15803d;
+}
+
+.modal-comparador {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  background-color: #f8fafc;
+}
+
+.modal-comparador > app-doc-comparator {
+  flex: 1;
+  min-width: 0;
+}
+
+.document-card.marcado {
+  border-color: #007bff;
+  background-color: #f8fbff;
+  box-shadow: 0 0 0 1px #007bff;
+}

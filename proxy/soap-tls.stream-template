@@ -1,0 +1,31 @@
+# =============================================================================
+# SOAP con TLS de extremo a extremo. nginx no descifra: reenvía la conexión a
+# Jetty, que hace el TLS y valida el certificado de cliente, la lista de
+# huellas y el token, igual que en modo standalone.
+# =============================================================================
+
+# Resolución dinámica: nginx arranca aunque backend-ws todavía no exista
+resolver 127.0.0.11 valid=10s ipv6=off;
+map $remote_addr $sensia_ws_tls {
+    default backend-ws:8443;
+}
+
+# Registro con la IP real del cliente
+log_format soap_tls '$remote_addr [$time_local] $status '
+                    'enviados=$bytes_sent recibidos=$bytes_received '
+                    'duracion=$session_time sni="$ssl_preread_server_name"';
+
+server {
+    listen 8443;
+    listen [::]:8443;
+
+    ssl_preread on;            # solo lee el nombre pedido (SNI) para el registro; no descifra
+    proxy_pass $sensia_ws_tls;
+    proxy_connect_timeout 5s;
+    proxy_timeout 300s;
+    access_log /var/log/nginx/access.log soap_tls;
+
+    # Opcional: solo las redes de los integradores
+    # allow 10.20.0.0/16;
+    # deny  all;
+}

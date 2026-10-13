@@ -1,0 +1,50 @@
+# Teléfonos de atención al cliente y contactos
+965 292 000
+965292000
+regex:(?i)\bdpd@[a-zA-Z0-9.-]+\.es\b
+
+# Nombres de entidades o calles públicas
+regex:(?iu)Suma[\s\.,\-_]+Gesti[oó]n[\s\.,\-_]+Tributaria
+regex:(?iu)Diputaci[oó]n[\s\.,\-_]+de[\s\.,\-_]+Alicante
+regex:(?iu)PLAZA[\s\.,\-_]+SAN[\s\.,\-_]+CRIST[OÓ]BAL
+regex:(?iu)RAMBLA[\s\.,\-_]+M[EÉ]NDEZ[\s\.,\-_]+NU[ÑN][EÉ]Z
+Plaza San Cristóbal, 1 03002 Alicante, Alicante
+
+# Identificadores de organismos publicos
+regex:(?i)\b[PQS]\s{0,2}\d{7}[A-Z]\b
+
+# Cargos Directivos y Jefaturas
+regex:(?iu)JEFE[\s\.,\-_]+DE[\s\.,\-_]+RECAUDACI[OÓ]N
+regex:(?iu)JEFE[\s\.,\-_]+DE[\s\.,\-_]+GESTI[OÓ]N[\s\.,\-_]+TRIBUTARIA
+regex:(?iu)JEFE[\s\.,\-_]+DE[\s\.,\-_]+UNIDAD
+regex:(?iu)JEFE[\s\.,\-_]+DE[\s\.,\-_]+SECCI[OÓ]N
+regex:(?iu)JEFE[\s\.,\-_]+DE[\s\.,\-_]+NEGOCIADO
+
+# Cargos Institucionales de Administración
+regex:(?iu)SECRETARIO[\s\.,\-_]+GENERAL
+regex:(?iu)INTERVENTOR[\s\.,\-_]+GENERAL
+regex:(?iu)TESORERO[\s\.,\-_]+MUNICIPAL
+regex:(?iu)RECAUDADOR[\s\.,\-_]+EJECUTIVO
+regex:(?iu)ALCALDE[\s\.,\-_]+PRESIDENTE
+
+# Otros roles de gestión
+regex:(?iu)DIRECTOR[\s\.,\-_]+GENERAL
+regex:(?iu)CONCEJAL[\s\.,\-_]+DE[\s\.,\-_]+HACIENDA
+regex:(?iu)AGENTE[\s\.,\-_]+DE[\s\.,\-_]+RECAUDACI[OÓ]N
+
+# Fechas
+regex:(?iu)\b(?:0?[1-9]|[12][0-9]|3[01])\s+de\s+(?:enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)\s+de\s+(?:19|20)\d{2}\b
+
+# Organos
+regex:(?iu)\b(?:consejo|junta|pleno|comision|comite|mesa)\b\s+(?:de|del|general|directiva|ejecutivo|ejecutiva|superior|asesor|asesora|mixta|permanente|oficial)\b
+regex:(?iu)\b(?:asamblea|tribunal|camara|claustro|patronato|colegio)\b\s+(?:de|del|general|directiva|ejecutivo|ejecutiva|superior|asesor|asesora|mixta|permanente|oficial)\b
+regex:(?iu)\b(?:ministerio|consejeria|secretaria|direccion|diputacion)\b\s+(?:de|del|general|directiva|ejecutivo|ejecutiva|superior|asesor|asesora|mixta|permanente|oficial)\b
+
+# Excepciones varias
+regex:(?iu)MAXIMO[\s]DE[\s]DIEZ[\s]DIAS
+
+# AYUNTAMIENTOS / DIPUTACIONES
+#AYUNTAMIENTO
+#AJUNTAMENT
+#DIPUTACION
+#DIPUTACIÒ

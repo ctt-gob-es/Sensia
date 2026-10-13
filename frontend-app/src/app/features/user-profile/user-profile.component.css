@@ -1,0 +1,211 @@
+.profile-container {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 0 32px 32px 32px;
+  font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+  color: #202124;
+}
+
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+}
+
+.profile-title {
+  font-size: 1.25rem;
+  margin-bottom: 0;
+  color: #5f6368;
+}
+
+hr.header-hr {
+  border: 0;
+  height: 1px;
+  background: #dadce0;
+  margin: 0 0 24px 0;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 24px;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+.section-card {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.section-card h4 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  color: #1a73e8;
+  font-weight: 500;
+  border-bottom: 1px solid #f1f3f4;
+  padding-bottom: 8px;
+}
+
+.section-desc {
+  font-size: 13px;
+  color: #5f6368;
+  margin-top: 8px;
+  margin-bottom: 24px;
+}
+
+.input-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  max-width: 400px; 
+  margin: 0 auto;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.input-group label {
+  font-size: 12px;
+  color: #5f6368;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.input-group input[type="password"],
+.input-group input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.input-group input:focus {
+  border-color: #1a73e8;
+  outline: none;
+}
+
+
+.password-wrapper {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.password-wrapper input {
+  padding-right: 44px !important; 
+}
+
+.eye-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 4px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #70757a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.eye-btn:hover {
+  background-color: #f1f3f4;
+  color: #202124;
+  box-shadow: none; 
+}
+
+.error-text {
+  color: #c5221f;
+  font-size: 12px;
+  margin-top: -8px;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.form-actions {
+  margin-top: auto; 
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* =========================================
+   Botones 
+   ========================================= */
+button {
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  border-radius: 4px;
+  padding: 8px 16px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-save { background-color: #1e8e3e; color: white; }
+.btn-save:disabled { background-color: #dadce0; color: #70757a; cursor: not-allowed; }
+.btn-save:not(:disabled):hover { opacity: 0.9; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+
+.btn-cancel { background-color: transparent; color: #1a73e8; }
+.btn-cancel:hover { background-color: #f8f9fa; }
+
+/* =========================================
+   Específico: Zona de Peligro
+   ========================================= */
+.danger-zone {
+  border: 1px solid #fad2cf;
+}
+
+.danger-zone h4.danger-text {
+  color: #c5221f;
+  border-bottom-color: #fad2cf;
+}
+
+.danger-action {
+  margin-top: auto;
+  background-color: #fce8e6;
+  padding: 16px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+}
+
+.btn-danger-outline {
+  background-color: transparent;
+  color: #c5221f;
+  border: 1px solid #c5221f;
+  width: 100%;
+}
+
+.btn-danger-outline:hover {
+  background-color: #c5221f;
+  color: white;
+}
+
+.alert {
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.alert-success { background-color: #e6f4ea; color: #1e8e3e; border: 1px solid #ceead6; }
+.alert-danger { background-color: #fce8e6; color: #c5221f; border: 1px solid #fad2cf; }

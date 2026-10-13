@@ -1,0 +1,12 @@
+{
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.autobuild.enabled": false,
+    "java.test.config": {
+        "name": "backend-ws",
+        "workingDirectory": "${workspaceFolder}/backend-ws",
+        "envFile": "${workspaceFolder}/backend-ws/.env",
+        "vmArgs": [
+            "-Djava.library.path=/usr/local/share/java/opencv4/"
+        ]
+    }
+}

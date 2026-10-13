@@ -1,0 +1,123 @@
+# =============================================================================
+# SensIA - observabilidad (perfil "obs"): Grafana, Loki, Tempo y Alloy
+# Se incluye desde ../docker-compose.yml y comparte su red por defecto.
+# Se activa con COMPOSE_PROFILES=obs en el .env (lo pone env.sh).
+# =============================================================================
+
+x-obs: &obs
+  profiles: ["obs"]
+  restart: unless-stopped
+  security_opt:
+    - "no-new-privileges:true"
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+networks:
+  # Red privada entre Alloy y el proxy del socket de Docker.
+  socket:
+    internal: true
+
+services:
+
+  grafana:
+    <<: *obs
+    cap_drop: [ALL]
+    image: grafana/grafana:12.4.5
+    ports:
+      # Solo desde el propio servidor; se accede con un túnel SSH
+      - "127.0.0.1:3030:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      # Solo se aplica al crear la base de datos de Grafana (primer arranque)
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:?Falta GRAFANA_PASSWORD en .env}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
+      GF_NEWS_NEWS_FEED_ENABLED: "false"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./datasources.yaml:/etc/grafana/provisioning/datasources/sensia.yaml:ro
+    depends_on:
+      - loki
+      - tempo
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+
+  loki:
+    <<: *obs
+    cap_drop: [ALL]
+    image: grafana/loki:3.7.8
+    command: ["-config.file=/etc/loki/loki.yaml"]
+    volumes:
+      - ./loki.yaml:/etc/loki/loki.yaml:ro
+      - loki-data:/loki
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+
+  tempo:
+    <<: *obs
+    cap_drop: [ALL]
+    image: grafana/tempo:2.10.0
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./tempo.yaml:/etc/tempo.yaml:ro
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+
+  docker-proxy:
+    <<: *obs
+    image: tecnativa/docker-socket-proxy:v0.5.0
+    environment:
+      # Solo lectura de contenedores, logs y lista de redes 
+      CONTAINERS: "1"
+      NETWORKS: "1"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - socket
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+
+  alloy:
+    <<: *obs
+    # Sin root: lee los logs a través de docker-proxy, no del socket
+    user: "473:473"
+    cap_drop: [ALL]
+    image: grafana/alloy:v1.17.1
+    command:
+      - run
+      - --server.http.listen-addr=127.0.0.1:12345
+      - --storage.path=/var/lib/alloy/data
+      - --disable-reporting
+      - /etc/alloy/config.alloy
+    volumes:
+      - ./config.alloy:/etc/alloy/config.alloy:ro
+      - alloy-data:/var/lib/alloy/data
+    networks:
+      - default
+      - socket
+    depends_on:
+      - loki
+      - docker-proxy
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+
+volumes:
+  grafana-data:
+  loki-data:
+  alloy-data:

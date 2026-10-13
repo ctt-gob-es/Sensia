@@ -1,0 +1,40 @@
+{
+  "userSettings": {
+    "sensiaOptions": {
+      "redactionPreview": true,
+      "documentOptions": {
+        "redactQRCodes": true,
+        "redactNames": true,
+        "redactNERNames": false,
+        "redactNEROrg": false,
+        "redactNERLoc": false,
+        "redactNERMisc": false,
+        "redactNERScore": 0.65,
+        "removeImages": false,
+        "preserveLogo": true,
+        "logoExclusionZone": [0, 700, 200, 142],
+        "redactionThickness": 2,
+        "usePseudonyms": false
+      },
+      "faceOptions": {
+        "maskFaces": true,
+        "minFaceAspectRatio": 0,
+        "maxFaceAspectRatio": 0,
+        "minFaceArea": 0,
+        "maxFaceArea": 0,
+        "pixelationIntensity": 70
+      },
+      "yunetOptions": {
+        "scoreThreshold": 0.30,
+        "nmsThreshold": 0.45,
+        "topK": 5000
+      }
+    }
+  },
+  "systemConfig": {
+    "maintenanceMode": false,
+    "captchaEnabled": true,
+    "registrationEnabled": false,
+    "passwordRecoveryEnabled": false
+  }
+}

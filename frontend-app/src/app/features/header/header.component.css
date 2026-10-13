@@ -1,0 +1,130 @@
+:host {
+  --navbar-bg-color: #ffffff;
+  --navbar-text-color: #475569;     
+  --navbar-brand-color: #0f172a;    
+  --navbar-link-hover-bg: #f8fafc;  
+  --navbar-border-color: #e2e8f0; 
+  display: block;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar {
+  background-color: var(--navbar-bg-color);
+  border-bottom: 1px solid var(--navbar-border-color);
+  padding: 0 2rem;
+  height: 64px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+  height: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--navbar-brand-color);
+  text-decoration: none;
+}
+
+
+.navbar-logo {
+  height: 40px;
+  width: auto;
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+  border: 1px solid transparent;
+  position: relative;
+}
+
+.user-menu:hover {
+  background-color: var(--navbar-link-hover-bg);
+  border-color: var(--navbar-border-color);
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-right: 0.75rem;
+}
+
+.user-name {
+  font-weight: 500;
+  margin-right: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.dropdown-caret {
+  font-size: 0.7em;
+  color: #94a3b8;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 60px; 
+  right: 0;
+  background-color: white;
+  border: 1px solid var(--navbar-border-color);
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  min-width: 200px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; 
+}
+
+.dropdown-menu a {
+  padding: 0.85rem 1.25rem;
+  text-decoration: none;
+  color: var(--navbar-text-color);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.dropdown-menu a:hover {
+  background-color: var(--navbar-link-hover-bg);
+  color: #0f172a;
+}
+
+.dropdown-menu hr {
+  margin: 0;
+  border: none;
+  border-top: 1px solid var(--navbar-border-color);
+}
+
+@media (max-width: 640px) {
+  .navbar {
+    padding: 0 1rem;
+  }
+
+  .brand-long {
+    display: none;
+  }
+
+  .user-name {
+    max-width: 40vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

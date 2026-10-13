@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package ner;
+option java_package = "ner";
+
+option java_multiple_files = true; 
+
+service NerService {
+  rpc RecognizeEntities (NerRequest) returns (NerResponse);
+}
+
+message NerRequest {
+  string text = 1;
+}
+
+message NerResponse {
+  repeated Entity entities = 1;
+  uint64 inference_time_ms = 2;
+}
+
+message Entity {
+  string word = 1;
+  string category = 2; // PER, LOC, ORG u OTH
+  float score = 3;
+  int32 start_char = 4; // en caracteres Unicode (code points), no en unidades UTF-16
+  int32 end_char = 5;
+}

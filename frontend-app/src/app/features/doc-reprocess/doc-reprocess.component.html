@@ -1,0 +1,129 @@
+<div class="modal-overlay">
+  <div class="modal-content settings-container" role="dialog" aria-modal="true" aria-labelledby="titulo-repetir">
+    <header class="settings-header">
+      <h3 class="settings-title" id="titulo-repetir">🔄 Repetir análisis</h3>
+      <p class="settings-subtitle">Ajustes de este documento. El resto de opciones sale de tus preferencias.</p>
+    </header>
+
+    <div class="template-bar">
+      <div class="input-group">
+        <label for="plantilla">Partir de</label>
+        <select id="plantilla" class="form-select" (change)="onTemplateSelect($event)">
+          <option value="" [selected]="!selectedTemplate">Opciones globales</option>
+          <option *ngFor="let tpl of userTemplates" [value]="tpl.id" [selected]="tpl.id === selectedTemplate?.id">
+            {{ tpl.name }}{{ tpl.isPublic ? ' (pública)' : '' }}
+          </option>
+        </select>
+      </div>
+      <button type="button" class="btn-cancel" (click)="saveOrUpdateTemplate()" [disabled]="isSavingTemplate">
+        {{ isSavingTemplate ? 'Guardando...' : (plantillaPropia ? '💾 Actualizar plantilla' : '💾 Guardar como plantilla') }}
+      </button>
+      <button type="button" class="btn-cancel" (click)="deleteCurrentTemplate()"
+        [disabled]="isDeletingTemplate || !plantillaPropia">
+        {{ isDeletingTemplate ? 'Borrando...' : '🗑️ Borrar' }}
+      </button>
+    </div>
+
+    <form [formGroup]="reprocessForm" class="modal-body">
+      <div class="grid-container">
+
+        <section class="card section-card">
+          <h4>Palabras</h4>
+
+          <div class="input-group">
+            <label for="bloqueadas">Censurar siempre (lista negra)</label>
+            <textarea id="bloqueadas" formControlName="bloqueadas" rows="3"
+              placeholder="ej: confidencial; &#10;expediente 2024/113"></textarea>
+            <small>Separadas por punto y coma (;).</small>
+          </div>
+
+          <div class="input-group">
+            <label for="permitidas">No censurar nunca (lista blanca)</label>
+            <textarea id="permitidas" formControlName="permitidas" rows="3"
+              placeholder="ej: Ayuntamiento; &#10;Registro General"></textarea>
+            <small>Separadas por punto y coma (;).</small>
+          </div>
+        </section>
+
+        <section class="card section-card">
+          <div class="titulo-con-ayuda">
+            <h4>Imágenes y zonas</h4>
+            <div class="help-icon" tabindex="0" aria-label="Zonas de referencia">
+              <i>i</i>
+              <div class="help-popup">
+                <strong>Zonas de referencia (X, Y, W, H)</strong>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Zona</th>
+                      <th>Coordenadas</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Cabecera Alta</td><td><code>0, 722, 595, 120</code></td></tr>
+                    <tr><td>Cabecera Alta Izquierda</td><td><code>0, 742, 150, 100</code></td></tr>
+                    <tr><td>Logotipo</td><td><code>0, 700, 200, 142</code></td></tr>
+                    <tr><td>Margen Derecho</td><td><code>540, 0, 55, 842</code></td></tr>
+                    <tr><td>Margen Izquierdo</td><td><code>0, 0, 145, 842</code></td></tr>
+                    <tr><td>Pie de Página</td><td><code>0, 0, 595, 100</code></td></tr>
+                    <tr><td>Zona Central</td><td><code>100, 200, 395, 442</code></td></tr>
+                  </tbody>
+                </table>
+                <p class="nota-ayuda">* Puntos sobre A4 (595 × 842), con el origen en la esquina inferior izquierda.</p>
+              </div>
+            </div>
+          </div>
+
+          <label class="switch-container">
+            <input type="checkbox" formControlName="eliminarImagenes">
+            <span class="switch-slider"></span>
+            <span class="switch-label">Eliminar imágenes</span>
+          </label>
+
+          <div class="input-group">
+            <label for="zonas-fijas">Censuras fijas</label>
+            <input id="zonas-fijas" type="text" formControlName="zonasFijas"
+              placeholder="ej: 0, 0, 595, 100; 540, 0, 55, 842" [class.input-error]="invalido('zonasFijas')">
+            <small *ngIf="invalido('zonasFijas')" class="texto-error">
+              Formato incorrecto. Usa X, Y, W, H y separa cada zona con «;».
+            </small>
+            <small *ngIf="!invalido('zonasFijas')">
+              Rectángulos X, Y, W, H separados por «;», incluidas las zonas marcadas en el visor.
+              Se censuran en todas las páginas.
+            </small>
+          </div>
+
+          <div class="input-group">
+            <label for="zona-logo">Zona del logotipo</label>
+            <input id="zona-logo" type="text" formControlName="zonaLogo"
+              placeholder="Vacío: sin zona de logotipo" [class.input-error]="invalido('zonaLogo')">
+            <small *ngIf="invalido('zonaLogo')" class="texto-error">
+              Formato incorrecto. Usa 4 números: X, Y, W, H.
+            </small>
+            <small *ngIf="!invalido('zonaLogo')">
+              Solo se usa con «Preservar logotipo» activado en tus preferencias.
+            </small>
+          </div>
+        </section>
+
+      </div>
+    </form>
+
+    <div class="modal-footer">
+      <div class="modo" aria-live="polite">
+        <p class="detalle-modo">
+          {{ soloAnalisis
+            ? 'Este documento no tiene resultado: se analizará desde el principio.'
+            : 'Se volverá a analizar todo el documento con estos ajustes y tus preferencias. Tus decisiones del panel se conservan.' }}
+        </p>
+      </div>
+
+      <div class="acciones">
+        <button type="button" class="btn-cancel" (click)="onCancel()">Cancelar</button>
+        <button type="button" class="btn-save" (click)="onSubmit()" [disabled]="isProcessing">
+          {{ isProcessing ? 'Analizando…' : 'Analizar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

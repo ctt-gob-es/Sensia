@@ -1,0 +1,14 @@
+services:
+  docs:
+    build:
+      context: .
+      dockerfile: Dockerfile.docs
+    working_dir: /work/docs
+    volumes:
+      - .:/work/docs
+    environment:
+      CHROME_BIN: /usr/bin/chromium
+      HOME: /tmp
+      XDG_CACHE_HOME: /tmp/.cache
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    entrypoint: ["bash", "scripts/build-docs-docker.sh"]

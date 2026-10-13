@@ -1,0 +1,286 @@
+# =======================================================
+# ARCHIVO DE CONFIGURACIÓN DE CENSURA
+# Las líneas que empiezan por # son ignoradas
+# =======================================================
+
+
+
+# =======================================================
+# IDENTIFICACIÓN ESPAÑOLA (NIF, NIE, CIF)
+# =======================================================
+
+# 1. NIF / DNI (Personas Físicas Españolas)
+# Formato: 8 números + Separador opcional + 1 Letra de control (sin I, Ñ, O, U)
+# Detecta: 12345678Z, 12345678-Z, 12345678 Z
+NIF::\b\d{8}[-\s]?[TRWAGMYFPDXBNJZSQVHLCKE]\b
+
+# 2. NIF CON PUNTOS (Formato "bonito")
+# Detecta: 12.345.678-Z
+NIF::\b\d{1,2}\.\d{3}\.\d{3}[-\s]?[TRWAGMYFPDXBNJZSQVHLCKE]\b
+
+# 3. NIE (Extranjeros Residentes)
+# Formato: Letra (X,Y,Z) + Separador opcional + 7 números + Separador opcional + Letra
+# Detecta: X1234567Z, Y-1234567-R, Z 1234567 T
+NIE::\b[XYZ][-\s]?\d{7}[-\s]?[TRWAGMYFPDXBNJZSQVHLCKE]\b
+
+# 4. CIF (Empresas y Personas Jurídicas)
+# Formato: Letra Entidad + 7 números + Dígito o Letra de control
+# Letras válidas de inicio: A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,U,V,W
+# Detecta: A12345678, B-12345678, P2800000I
+CIF::\b[ABCDEFGHJKLMNPQRSUVW][-\s]?\d{7}[-\s]?[0-9A-J]\b
+
+
+
+
+
+
+# =======================================================
+# TARJETAS DE CRÉDITO / DÉBITO
+# =======================================================
+
+# 1. VISA (Empiezan por 4, longitud 16)
+# Detecta: 4111-2222-3333-4444 o 4111222233334444
+CREDIT_CARD::\b4[0-9]{3}[-\s]?[0-9]{4}[-\s]?[0-9]{4}[-\s]?[0-9]{4}\b
+
+# 2. MASTERCARD (Empiezan por 51-55 o 22-27, longitud 16)
+# Detecta: 5500 1234 5678 9012
+#\b(5[1-5][0-9]{2}|222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[-\s]?[0-9]{4}[-\s]?[0-9]{4}[-\s]?[0-9]{4}\b
+CREDIT_CARD::(?<![A-Z]{2}\d{2}[-\s]?)\b(5[1-5][0-9]{2}|222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[-\s]?[0-9]{4}[-\s]?[0-9]{4}[-\s]?[0-9]{4}\b
+
+# 3. AMERICAN EXPRESS (Empiezan por 34 o 37, longitud 15)
+# Formato típico: 3712 345678 90123
+CREDIT_CARD::\b3[47][0-9]{2}[-\s]?[0-9]{6}[-\s]?[0-9]{5}\b
+
+# 4. TARJETA GENÉRICA (Cualquier bloque de 16 dígitos)
+# Censura cualquier bloque de 16 dígitos, también tarjetas no reconocidas.
+# Peligro: Puede censurar números de serie largos.
+# \b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b
+
+
+
+
+
+
+# =======================================================
+# CUENTAS BANCARIAS (ESPAÑA)
+# =======================================================
+
+# 5. IBAN ESPAÑOL (Formato Moderno - 24 Caracteres)
+# Ya cubierto por el IBAN genérico (bloques de 4 o seguido). Se deja comentado.
+#\bES\d{2}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{2}[-\s]?\d{10}\b
+
+
+# 6. IBAN GENÉRICO
+# Dos letras país + 2 números + 20 caracteres alfanuméricos (IBAN de 24: España y algunos otros)
+# Detecta: ES91 2100 0418 4502 0005 1332 | ES9121000418450200051332
+#\b[A-Z]{2}\d{2}[-\s]?[0-9A-Z]{4}[-\s]?[0-9A-Z]{4}[-\s]?[0-9A-Z]{4}[-\s]?[0-9A-Z]{0,12}\b
+IBAN::\b[A-Z]{2}\d{2}[-\s]?[0-9A-Z]{4}[-\s]?[0-9A-Z]{4}[-\s]?[0-9A-Z]{4}[-\s]?[0-9A-Z]{4}[-\s]?[0-9A-Z]{4}\b
+
+# 7. CÓDIGO CUENTA CLIENTE - CCC (Formato Antiguo - 20 Dígitos)
+# Estructura: Entidad(4) Oficina(4) DC(2) Cuenta(10)
+# Detecta: 2100-1234-99-1234567890
+#\b\d{4}[-\s]?\d{4}[-\s]?\d{2}[-\s]?\d{10}\b
+#\b(?:\d{20}|\d{4}[-\s]\d{4}[-\s]\d{2}[-\s]\d{10})\b
+#(?<![A-Z]{2}\d{2}[-\s]?)\b\d{4}[-\s]?\d{4}[-\s]?\d{2}[-\s]?\d{10}\b
+
+
+# 8. IMPORTES MONETARIOS GRANDES (Para evitar que se vean saldos)
+# Detecta cifras como: 1.500,00 € | 12.000,50 EUR
+# Busca números con puntos de miles y coma decimal, seguidos de símbolo moneda
+# (?!\w) en lugar de \b: tras € o $ el \b nunca se cumple
+#\b\d{1,3}(\.\d{3})*,\d{2}\s?(€|EUR|euros|USD|\$)(?!\w)
+
+
+
+
+
+# =======================================================
+# UBICACIONES Y DIRECCIONES
+# =======================================================
+
+# Referencia Catastral (España)
+# Es un código único de 20 caracteres.
+# Estructura general aplicable a Urbanas y Rústicas:
+# - Bloque 1 y 2 (14 pos): Alfanuméricos (Finca y plano/polígono)
+# - Bloque 3 (4 pos): SIEMPRE NÚMEROS (Identificador de inmueble, ej: 0001)
+# - Bloque 4 (2 pos): SIEMPRE LETRAS MAYÚSCULAS (Caracteres de control, ej: WX)
+RC::(?<![A-Z0-9])[A-Z0-9]{7}\s?[A-Z0-9]{7}\s?\d{4}\s?[A-Z]{2}(?![A-Z0-9])
+
+# Direcciones Urbana (Portal, Bloque, Piso, Puerta, Garaje)
+# Detecta: CL ESPRONCEDA 99 | CL ESPRONCEDA 99 BLQ 1 | CL ESPRONCEDA 99 -1 9 | C/ MAYOR, 5 | PL SAN NICOLAS 4 | CL X 6 1 01 IZ
+DIRECCION::(?U)(?<!\w)(?:(?:CALLE|AVENIDA|PLAZA|CL|AV|PZ|PL|PS|CM|CT|TR|CJ|UR|BQ|CO|GL|PJ|PQ|RBL|BO)[\s\.\-_]+|C/\s*)[\p{L}\d\s\.\-,'’´ºª]{2,60}?\s+(?:\d{1,4}|S[\s/]?N)(?:[\s\-/,]+(?:BLQ|ESC|E\d{1,2}|BJ|BAJO|PR|EN|AT|SO|SS|IZQ|IZDA|IZ|DCHA?|DR|CEN|EXT|INT|-?\d{1,4}[ºª]?|\p{L})){0,6}(?!\w)
+
+# Direcciones Urbana (Portal, Bloque, Piso, Puerta, Garaje) sin siglas con municipio al final
+# Detecta: ESPRONCEDA 99 ALICANTE (ALICANTE)
+DIRECCION::(?U)(?<!\w)(?!(?:CALLE|AVENIDA|PLAZA|CL|AV|PZ|PL|PS|CM|CT|TR|CJ|UR|BQ|CO|GL|PJ|PQ|RBL|BO)[\s\u00A0])[\p{Lu}\d\s\u00A0\.\-,'’´ºª]{3,50}?\s+(?:\d{1,4}|S[\s\u00A0/]?N)(?:[\s\u00A0\-/,]+(?:BLQ|ESC|E\d{1,2}|BJ|BAJO|PR|EN|AT|SO|SS|IZQ|IZDA|IZ|DCHA?|DR|CEN|EXT|INT|-?\d{1,4}[ºª]?|\p{Lu})){0,6}\s*[\-\u2013\u2014]\s*[\p{Lu}\s]{2,25}(?:\s*\([\p{Lu}\s]{2,20}\))?(?!\w)
+
+# Dirección / Domicilio con etiqueta (sin sigla ni municipio)
+# Detecta: Dirección: ESPRONCEDA 42 2 A | Domicilio fiscal: Mayor 5, 2º B
+# Exige al menos un dígito en el valor para no tapar webs u otros textos
+DIRECCION::(?U)(?<=(?i:direcci[óo]n|domicilio(?:\s{1,3}fiscal)?)\s{0,3}:\s{0,3})(?=[^\n]{0,60}\d)[\p{L}\d][^\n]{3,80}
+
+# Vias de transito exteriores (Caminos, Carreteras, Travesías)
+# Detecta: CM DE LOS MOLINOS 44 | CTRA ALICANTE 12 | Ctra. Alicante 12 | TR DE LA IGLESIA 3
+# Sin (?i): en minúsculas "cm" (centímetros) daba falsos positivos
+DIRECCION::(?U)(?<!\w)(?:CM|CT|CTRA|Ctra|TR|CJ)[\s\.\-_]+[\p{L}\d\s\.\-,]{2,60}?\s+\d+(?!\w)
+
+# Ubicaciones rurales
+# Detecta como: Polígono 12 Parcela 345 / Pol. 12, Parc. 345 / POLIGONO 12 PARCELA 345
+DIRECCION::(?iU)\b(Pol[íi]gono|Pol\.?)\s+\d+\s*,?\s+(Parcela|Parc\.?)\s+\d+\b
+
+# Escalera/planta/puerta
+# Detecta: Esc. 1 Pl. 2 Pta. A | Es:1 Pl:02 Pt:01 (formato Catastro)
+DIRECCION::\b(Esc|Es)[.:]?\s?[0-9A-Z]*\s?(Pl|P|Planta)[.:]?\s?[0-9A-Z]+\s?(Pt|Pta)[.:]?\s?[0-9A-Z]+\b
+
+# CÓDIGO POSTAL con etiqueta (opcional)
+# Detecta: Código postal: 03204 | C.P. 03204
+#(?U)(?<=(?i:c[óo]digo\s{1,2}postal|c\.\s?p\.)\s{0,2}:?\s{0,3})\d{5}\b
+
+# CÓDIGO POSTAL seguido de MUNICIPIO en mayúsculas (opcional)
+# Detecta: 03204 ELX | 48710 BERRIATUA | 03560 - EL CAMPELLO
+#(?U)(?<![\w.,/])(?:0[1-9]|[1-4]\d|5[0-2])\d{3}(?!\w)(?=\s*-?\s*\p{Lu}{2,})
+
+
+
+
+# =======================================================
+# CÓDIGOS DE REGISTRO Y VERIFICACIÓN (CSV / HUELLAS)
+# =======================================================
+
+
+# 1. CÓDIGOS CSV GENÉRICOS (Administración Pública)
+# Muchos documentos oficiales tienen un "CSV: " seguido de letras y números.
+# Detecta: CSV: 1234567890ABCDEF | CSV: 0008952018699987906554
+# Busca prefijos comunes (CSV, CVE, REG, ID) seguidos de guion o dos puntos y el código
+# Alfanumérico con al menos un dígito
+CODIGO_SEGURO::\b(CSV|CVE|REG|ID|REF|REGAGE|ORVE)[:\-\s]+(?=[0-9A-Za-z]*\d)[0-9A-Za-z]{16,}\b
+CODIGO_SEGURO::\b(CSV)[:\-\s]+(?=[0-9]*\d)[0-9]{20}\b
+
+# 2. HASHES / HUELLAS DIGITALES (Hexadecimales largos sueltos)
+# Para códigos sin prefijo (sin CSV, REG…).
+# Detecta cadenas de 32 a 64 caracteres hexadecimales (MD5, SHA-1, SHA-256)
+# Puede tachar otros datos hexadecimales largos.
+# \b[0-9a-fA-F]{32,64}\b
+
+# 3. UUID / GUID (Identificadores universales)
+# Muy común en informática y bases de datos.
+# Detecta: 123e4567-e89b-12d3-a456-426614174000
+UUID::\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b
+
+# 4. CSV con puntos (con prefijo opcional de organismo)
+# Detecta: 2024.6327.9124.1364 | 001128-2023.8135.7927.7231
+#\b(?:\d{6}-)?[0-9]{4}[.][0-9]{4}.[0-9]{4}.[0-9]{4}\b
+CSV::\b(?:\d{6}-)?\d{4}\.\d{4}\.\d{4}\.\d{4}\b
+CSV::\b[0-9]{22}\b
+CSV::\b[0-9]{16}\b
+
+# 5. codebar
+# codigos de referencias de pago (código de barras de 42 dígitos)
+#\b[0-9]{42}\b
+CODE_BAR_PAGO::(?<!\d)\d{42}(?!\d)
+
+
+# 6. Nº DE SERIE de certificados / claves (opcional)
+# Detecta: serie 95988630749005031072842698656373084059 | serie 454148
+#(?iU)(?<=\bserie\s{1,3})\d{6,}\b
+
+# 7. REFERENCIA DE PAGO SUMA (opcional)
+# Detecta: 0033088925-89
+#\b\d{10}-\d{2}\b
+
+
+
+
+# =======================================================
+# CORREOS ELECTRÓNICOS
+# =======================================================
+
+# 1. EMAIL ESTÁNDAR
+# Cubre: nombre.apellido+tag@empresa.dominio.com
+# Explicación: 
+# - Parte usuario: Letras, números y símbolos (._%+-).
+# - @: Obligatorio.
+# - Dominio: Letras, números, puntos y guiones.
+# - Extensión: Al menos 2 letras (ej: .es, .com, .co.uk).
+#\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b
+EMAIL::(?U)\b[\w.%+-]+@[\w.-]+\.[A-Za-z]{2,}\b
+
+
+
+
+# =======================================================
+# TELÉFONOS (ESPAÑA + INT)
+# =======================================================
+
+# 1. MÓVILES (Empiezan estrictamente por 6 o 7)
+# Detecta: 645768799 | 722 123 456
+# Ignora fijos, especiales y números internacionales.
+TELF::(?<![A-Za-z0-9_])[67](?:[-\s\.]?[0-9]){8}(?![A-Za-z0-9])
+
+# 2. FIJOS PROVINCIALES (Empiezan por 9 o 8, EXCEPTO 90 y 80)
+# Detecta: 911234567 | 88 123 45 67 | 96.123.45.67
+# Ignora móviles, especiales (900/800) e internacionales.
+# Lógica: Empieza por 9 seguido de 1-8, o por 8 seguido de 1-8.
+TELF::(?<![A-Za-z0-9_])(?:9[1-8]|8[1-8])(?:[-\s\.]?[0-9]){7}(?![A-Za-z0-9])
+
+# 3. NÚMEROS ESPECIALES Y TARIFICACIÓN (Empiezan por 90 o 80)
+# Detecta: 900 123 456 | 902123456 | 803 12 34 56
+# Ignora móviles, fijos normales e internacionales.
+# Lógica: Empieza obligatoriamente por 90 u 80.
+TELF::(?<![A-Za-z0-9_])(?:90|80)(?:[-\s\.]?[0-9]){7}(?![A-Za-z0-9])
+
+# 4. INTERNACIONALES (Obligatorio + o 00)
+# Detecta: +34 600 123 456 | +34600123456 | 0034 600 123 456
+# Con 00 exige separador tras el código de país para no confundir referencias como 0033088925-89
+# Ignora cualquier teléfono nacional sin prefijo internacional.
+TELF::(?<![A-Za-z0-9_])(?:\+[1-9][0-9]{0,2}|00[1-9][0-9]{0,2}[-\s\.])(?:[-\s\.]?[0-9]){7,14}(?![A-Za-z0-9])
+
+
+
+
+
+# =======================================================
+# CANDIDATO A NOMBRE ---> ** NO MODIFICAR** SIN TOCAR LA
+# EXPRESION HARDCODEADA EN CODIGO PARA DICCIONARIO O NER
+# =======================================================
+# De 2 a 4 palabras que empiezan por Mayúscula
+# Incluye soporte para partículas intermedias (de, del, la) en minúscula
+NOMBRE::(?U)\b(?:[A-ZÑÁÉÍÓÚ]{2,}|[A-ZÑÁÉÍÓÚ][a-zñáéíóú]+)(?:,?\s+(?:(?i:DE|DEL|LA|LAS|Y|SAN|SANTA)\s+)?(?:[A-ZÑÁÉÍÓÚ]{2,}|[A-ZÑÁÉÍÓÚ][a-zñáéíóú]+)){1,4}\b
+
+
+
+
+
+
+# =======================================================
+# VEHICULOS
+# =======================================================
+
+
+# BASTIDORES DE VEHÍCULOS (VIN, 17 caracteres, sin I/O/Q, al menos una letra)
+BASTIDOR::(?i)(?<![A-Za-z0-9_])(?=[0-9]{0,12}[A-HJ-NPR-Z])[A-HJ-NPR-Z0-9]{13}\d{4}(?![A-Za-z0-9_])
+
+# MATRÍCULAS (formato actual: sin vocales, Ñ ni Q)
+MATRICULA::(?<![A-Z0-9_])\d{4}[-\s]?[BCDFGHJKLMNPRSTVWXYZ]{3}(?![A-Z0-9])
+MATRICULA::(?<![A-Z0-9_])[A-Z]{1,3}[-]?\d{4}[-]?[A-Z]{2,3}(?![A-Z0-9])
+
+
+
+
+
+
+
+# =======================================================
+# GESTION ADMINISTRATIVA (VARIOS)
+# =======================================================
+
+# NÚMERO DE AFILIACIÓN SEGURIDAD SOCIAL
+# 12 dígitos: provincia(2) + número(8) + control(2)
+# Detecta: 281234567890 | 28 12345678 90 | 28/12345678/90
+#\b\d{2}[-\s/]?\d{8}[-\s/]?\d{2}\b
+
+# EXPEDIENTES ADMINISTRATIVOS
+#\b\d{4}[/-](?:[A-Z]{2,4}[/-])?\d{5,}\b
+
+# NÚMEROS LARGOS DE 14-16 DÍGITOS
+#\b\d{2}[-\s]?\d{10,12}[-\s]?\d{2}\b

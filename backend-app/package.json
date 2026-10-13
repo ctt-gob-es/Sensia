@@ -1,0 +1,39 @@
+{
+  "name": "backend-app",
+  "version": "1.0.0-rc.1",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node -r ./src/tracing.js src/server.js",
+    "test": "echo \"backend-app: sin tests automatizados\"",
+    "clean": "rm -rf ./node_modules ./dist ./logs/*.log",
+    "dev": "node --watch -r dotenv/config -r ./src/tracing.js src/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "EUPL-1.2",
+  "description": "",
+  "dependencies": {
+    "@opentelemetry/api": "^1.9.1",
+    "@opentelemetry/auto-instrumentations-node": "^0.80.0",
+    "@opentelemetry/sdk-node": "^0.222.0",
+    "altcha-lib": "^1.4.1",
+    "axios": "^1.13.5",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "nodemailer": "^10.0.0",
+    "sequelize": "^6.37.7",
+    "sqlite3": "^6.0.1",
+    "uuid": "^13.0.0",
+    "winston": "^3.19.0",
+    "xml-js": "^1.6.11"
+  },
+  "overrides": {
+    "tar": ">=7.5.8",
+    "sequelize": {
+      "uuid": "^11.1.1"
+    }
+  }
+}

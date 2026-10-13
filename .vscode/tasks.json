@@ -1,0 +1,11 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "backend-ws: dev-env",
+      "type": "shell",
+      "command": "make -C backend-ws dev-env",
+      "problemMatcher": []
+    }
+  ]
+}

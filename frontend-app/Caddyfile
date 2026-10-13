@@ -1,0 +1,26 @@
+{
+	# Imagen inmutable: sin API de administración ni guardado de configuración
+	admin off
+	persist_config off
+}
+
+# HTTP interno: el TLS lo termina proxy-nginx, que es el único punto expuesto.
+# El enrutado de /api y las cabeceras de seguridad también están en nginx.
+:80 {
+	encode zstd gzip
+	root * /usr/share/caddy
+
+	# Ficheros con huella en el nombre (main-ABCD1234.js...): caché de un año
+	@conhuella path_regexp -[A-Z0-9]{8}\.(js|css|woff2?)$
+	header @conhuella Cache-Control "public, max-age=31536000, immutable"
+
+	# index.html, env.json y el resto: revalidar siempre
+	@sinhuella {
+		not path_regexp -[A-Z0-9]{8}\.(js|css|woff2?)$
+	}
+	header @sinhuella Cache-Control "no-cache"
+
+	# Enrutamiento de la SPA
+	try_files {path} {path}/ /index.html
+	file_server
+}

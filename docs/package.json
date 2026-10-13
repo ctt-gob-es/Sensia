@@ -1,0 +1,25 @@
+{
+  "name": "sensia-docs",
+  "description": "Documentación técnica de SensIA",
+  "version": "1.0.0-rc.1",
+  "scripts": {
+    "docs:toc:integrador": "markdown-toc -i src/manual-integrador-sensia-ES.md --maxdepth 3 --bullets \"-\"",
+    "docs:toc:tecnico": "markdown-toc -i src/manual-tecnico-sensia-ES.md --maxdepth 3 --bullets \"-\"",
+    "docs:toc:usuario": "markdown-toc -i src/manual-usuario-sensia-ES.md --maxdepth 3 --bullets \"-\"",
+    "docs:toc": "npm run docs:toc:integrador && npm run docs:toc:tecnico && npm run docs:toc:usuario",
+    "docs:build:integrador": "md-to-pdf src/manual-integrador-sensia-ES.md --config-file pdf-config.js",
+    "docs:build:tecnico": "md-to-pdf src/manual-tecnico-sensia-ES.md --config-file pdf-config.js",
+    "docs:build:usuario": "md-to-pdf src/manual-usuario-sensia-ES.md --config-file pdf-config.js",
+    "docs:build": "npm run docs:build:integrador && npm run docs:build:tecnico && npm run docs:build:usuario",
+    "docs:all": "npm run docs:toc && npm run docs:build"
+  },
+  "devDependencies": {
+    "markdown-toc": "^1.2.0",
+    "md-to-pdf": "^5.2.5"
+  },
+  "overrides": {
+    "chokidar": "^4.0.3",
+    "argparse": "^2.0.1",
+    "toml": "^4.2.0"
+  }
+}

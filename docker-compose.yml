@@ -1,0 +1,249 @@
+# =============================================================================
+# SensIA - despliegue
+# Requiere el .env generado por env.sh y la PKI en ../pki
+# =============================================================================
+name: sensia
+
+include:
+  - ./observability/docker-compose.yml
+
+networks:
+  default:
+    name: sensia_net
+
+# Bloques comunes
+x-base: &base
+  restart: unless-stopped
+  security_opt:
+    - "no-new-privileges:true"
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "10"
+
+x-otel: &otel
+  OTEL_SDK_DISABLED: ${OTEL_SDK_DISABLED:-true}
+  OTEL_TRACES_EXPORTER: ${OTEL_TRACES_EXPORTER:-none}
+  OTEL_METRICS_EXPORTER: "none"           # Tempo solo recibe trazas
+  OTEL_LOGS_EXPORTER: "none"
+
+
+# Servicios
+services:
+
+  proxy-nginx:
+    <<: *base
+    image: nginx:1.30-alpine
+    ports:
+      - "${PORT_PROXY_HTTP:-80}:80"
+      - "${PORT_PROXY_HTTPS:-443}:443"
+      - "${PORT_WS_MTLS:-8443}:8443"      # SOAP con TLS de extremo a extremo (lo valida Jetty)
+    environment:
+      DOMAIN_NAME: ${DOMAIN_NAME:?Falta DOMAIN_NAME en .env}
+      CERT_FILE: ${CERT_FILE:?Falta CERT_FILE en .env}
+      KEY_FILE: ${KEY_FILE:?Falta KEY_FILE en .env}
+      PORT_PROXY_HTTPS: ${PORT_PROXY_HTTPS:-443}
+      REQUIRE_MTLS: ${REQUIRE_MTLS:-false}
+    volumes:
+      - ./proxy/nginx.conf:/etc/nginx/templates/default.conf.template:ro
+      - ./proxy/soap-tls.stream-template:/etc/nginx/templates/soap-tls.conf.stream-template:ro
+      - ../pki/publico:/etc/nginx/certs:ro
+      - acme-webroot:/var/www/certbot:ro   # lo montamos para renovar Let's Encrypt sin parar el proxy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+
+  frontend-app:
+    <<: *base
+    build:
+      context: ./frontend-app
+      dockerfile: Dockerfile
+    expose:
+      - "80"
+    environment:
+      API_URL: /api
+      ENABLE_TRACING: ${ENABLE_TRACING:-false}
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+
+  backend-app:
+    <<: *base
+    build: ./backend-app
+    cap_drop: [ALL]
+    expose:
+      - "3000"
+    environment:
+      <<: *otel
+      OTEL_SERVICE_NAME: backend-app
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
+      PORT: "3000"
+      MAX_BODY_SIZE: 70mb
+      # MAX_UPLOAD_MB por documento; MAX_BODY_SIZE debe ser al menos 4/3 de este valor
+      MAX_UPLOAD_MB: "50" 
+      DB_STORAGE: /usr/src/app/bdd/database.db
+      DIR_LOGS: /usr/src/app/logs
+      HARD_MAINTENANCE: ${HARD_MAINTENANCE:-false}
+      SOAP_API_URL: https://${DOMAIN_NAME}/services/SensiaService
+      NODE_EXTRA_CA_CERTS: /opt/sensia/certs/ca.crt   # CA interna, para el certificado autofirmado
+      SOAP_API_TOKEN: ${SOAP_API_TOKEN:?Falta SOAP_API_TOKEN en .env}
+      JWT_SECRET: ${JWT_SECRET:?Falta JWT_SECRET en .env}
+      ALTCHA_HMAC_KEY: ${ALTCHA_HMAC_KEY:?Falta ALTCHA_HMAC_KEY en .env}
+      DEFAULT_ADMIN_USER: ${DEFAULT_ADMIN_USER:?Falta DEFAULT_ADMIN_USER en .env}
+      DEFAULT_ADMIN_PASSWORD: ${DEFAULT_ADMIN_PASSWORD:?Falta DEFAULT_ADMIN_PASSWORD en .env}
+      SMTP_AUTH_METHOD: ${SMTP_AUTH_METHOD:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      EMAIL_FROM: ${EMAIL_FROM:-}
+      OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID:-}
+      OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET:-}
+      OAUTH_REFRESH_TOKEN: ${OAUTH_REFRESH_TOKEN:-}
+      OAUTH_TOKEN_URL: ${OAUTH_TOKEN_URL:-}
+      OAUTH_SCOPE: ${OAUTH_SCOPE:-}
+      LOG_LEVEL: ${LOG_LEVEL:-}
+    volumes:
+      - backend-db:/usr/src/app/bdd
+      - backend-logs:/usr/src/app/logs
+      - ../pki/app:/opt/sensia/certs:ro
+    group_add:
+      - "${CERTS_GID:?Falta CERTS_GID en .env}"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3000/health', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+
+  backend-ws:
+    <<: *base
+    build: ./backend-ws
+    cap_drop: [ALL]
+    expose:
+      - "443"    # HTTPS con token (nginx /services/ y backend-app)
+      - "8443"   # HTTPS con token + mTLS (passthrough de nginx)
+    networks:
+      default:
+        aliases:
+          - ${DOMAIN_NAME}
+    depends_on:
+      backend-ner:
+        condition: service_healthy
+    volumes:
+      - ../pki/ws:/opt/sensia/certs:ro
+    environment:
+      <<: *otel
+      OTEL_SERVICE_NAME: backend-ws
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
+      AUTH_TOKEN: ${SOAP_API_TOKEN:?Falta SOAP_API_TOKEN en .env}
+      AUTH_CERT_WHITELIST: ${AUTH_CERT_WHITELIST:-}
+      JETTY_SSL_KEYSTORE_PATH: /opt/sensia/certs/keystore.p12
+      JETTY_SSL_KEYSTORE_PASSWORD: ${KEYSTORE_PASSWORD:?Falta KEYSTORE_PASSWORD en .env}
+      JETTY_SSL_TRUSTSTORE_PATH: /opt/sensia/certs/truststore.p12
+      JETTY_SSL_TRUSTSTORE_PASSWORD: ${TRUSTSTORE_PASSWORD:?Falta TRUSTSTORE_PASSWORD en .env}
+      JETTY_SSL_REQUIRECLIENTAUTH: "true"
+      JETTY_SSL_VALIDATEPEERCERTS: "false"
+      # Sin CRL/OCSP: un cliente se revoca quitando su huella de AUTH_CERT_WHITELIST
+      JETTY_SSL_ENABLECRLDP: "false"
+      JETTY_SSL_ENABLEOCSP: "false"
+      JETTY_HTTP_ENABLED: "false"
+      JETTY_HTTP_PORT: "80"
+      JETTY_HTTPS_ENABLED: "true"
+      JETTY_HTTPS_PORT: "443"
+      JETTY_SSL_ENABLED: ${REQUIRE_MTLS:-false}   # 8443 (mTLS) solo si se activa en env.sh
+      JETTY_SSL_PORT: "8443"
+      JETTY_THREADPOOL_MAXTHREADS: "200"
+      JETTY_THREADPOOL_MINTHREADS: "10"
+      JETTY_THREADPOOL_IDLETIMEOUTMS: "60000"
+      JETTY_CONNECTOR_IDLETIMEOUTMS: "30000"
+      JETTY_QOS_MAXREQUESTS: "8"
+      JETTY_QOS_SUSPENDMS: "30000"
+      JETTY_HTTP_MAXPOSTSIZE: "73400320"
+      GRPC_TARGET_HOST: backend-ner
+      GRPC_TARGET_PORT: "50051"
+      GRPC_TIMEOUT_SECONDS: "10"
+      GRPC_TLS_ENABLED: ${ENFORCE_SECURITY:-true}
+      GRPC_TLS_CA: /opt/sensia/certs/ca.crt
+      GRPC_TLS_CERT: /opt/sensia/certs/ws_client.crt
+      GRPC_TLS_KEY: /opt/sensia/certs/ws_client.key
+      LOG_LEVEL: ${LOG_LEVEL:-}
+      SENSIA_LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      # OJO. Registro de datos sensibles. Es un NIVEL de logback (OFF, ERROR, WARN, INFO, DEBUG),
+      SENSIA_LOG_SENSIBLE: "OFF"
+      SENSIA_LOG_SENSIBLE_DIR: /app/logs/sensible
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/443"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
+    deploy:
+      resources:
+        limits:
+          memory: 3g   # MaxRAMPercentage=75 / OJO: heap ~ 2,25 GB; si hay OOMKilled, bajar % o subir límite
+    group_add:
+      - "${CERTS_GID:?Falta CERTS_GID en .env}"   # para leer las claves de ../pki/ws (permisos 640)
+  backend-ner:
+    <<: *base
+    build:
+      context: ./backend-ner
+      dockerfile: Dockerfile
+    cap_drop: [ALL]
+    expose:
+      - "50051"
+    volumes:
+      - ../pki/ner:/opt/sensia/certs:ro
+    environment:
+      <<: *otel
+      OTEL_SERVICE_NAME: backend-ner
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4317
+      ENV: ${ENV:-production}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      GRPC_BIND_TYPE: TCP
+      GRPC_HOST: 0.0.0.0
+      GRPC_PORT: "50051"
+      ENFORCE_SECURITY: ${ENFORCE_SECURITY:-true}
+      TLS_CA_FILE: /opt/sensia/certs/ca.crt
+      TLS_CERT_FILE: /opt/sensia/certs/ner_server.crt
+      TLS_KEY_FILE: /opt/sensia/certs/ner_server.key
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+      HF_HUB_DISABLE_TELEMETRY: "1"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; socket.create_connection(('127.0.0.1', 50051), 3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 120s
+    deploy:
+      resources:
+        limits:
+          memory: 2g
+    group_add:
+      - "${CERTS_GID:?Falta CERTS_GID en .env}"   # para leer las claves de ../pki/ner (permisos 640)
+volumes:
+  backend-db:
+  backend-logs:
+  acme-webroot:

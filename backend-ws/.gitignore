@@ -1,0 +1,51 @@
+# Compiled class files & packages
+*.class
+*.jar
+*.war
+*.ear
+
+# Maven
+target/
+dependency-reduced-pom.xml
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# Environment & Secrets
+.env
+local-env/
+*.jks
+*.p12
+*.keystore
+*.truststore
+*.pem
+*.key
+
+# Test / Data
+test-data/
+test-output/
+
+# Logs
+*.log
+logs/
+logs-sensibles/
+
+# IDEs (IntelliJ, VSCode, Eclipse)
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+.factorypath
+
+# OS & Temp files
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak
+*~
